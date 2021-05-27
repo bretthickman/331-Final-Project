@@ -12,7 +12,33 @@ library(readxl)
 ```
 
 ```{r}
-school_data <- read.table("US_schools_data.xlsx")
+schools <- read_xlsx("US_schools_data.xlsx")
 ```
 
+```{r}
+clean_schools <-schools %>%
+  select(PRIMARY_KEY,
+         TOTAL_EXPENDITURE, 
+         INSTRUCTION_EXPENDITURE, 
+         SUPPORT_SERVICES_EXPENDITURE, 
+         OTHER_EXPENDITURE, 
+         CAPITAL_OUTLAY_EXPENDITURE, 
+         ends_with("READING"), 
+         ends_with("MATHEMATICS"))
+```
+
+```{r}
+clean_schools <- clean_schools %>%
+  separate(PRIMARY_KEY, 
+           into = c("year", "state"), 
+           sep = "_")
+```
+
+```{r}
+clean_schools %>%
+  pivot_longer("G04_A_A_READING":"G08_TR_A_MATHEMATICS",
+               names_to = c("grade","race", "sex", "test"),
+               names_sep = "_",
+               values_to = "count")
+```
 
