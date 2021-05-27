@@ -35,10 +35,37 @@ clean_schools <- clean_schools %>%
 ```
 
 ```{r}
-clean_schools %>%
+clean_schools <- clean_schools %>%
   pivot_longer("G04_A_A_READING":"G08_TR_A_MATHEMATICS",
                names_to = c("grade","race", "sex", "test"),
                names_sep = "_",
                values_to = "count")
 ```
+
+
+```{r}
+MIDWEST <- c("INDIANA","ILLINOIS","MICHIGAN","OHIO","WISCONSIN",
+             "IOWA","KANSAS","MINNESOTA","MISSOURI","NEBRASKA",
+             "NORTH DAKOTA","SOUTH DAKOTA")
+
+NORTHEAST <- c("CONNECTICUT","MAINE","MASSACHUSETTS","NEW HAMPSHIRE",
+             "RHODE ISLAND","VERMONT","NEW JERSEY","NEW YORK",
+             "PENNSYLVANIA")
+
+SOUTH <- c("DELAWARE","DISTRICT","FLORIDA","GEORGIA",
+            "MARYLAND","NORTH CAROLINA","SOUTH CAROLINA","VIRGINIA",
+            "WEST VIRGINIA","ALABAMA","KENTUCKY","MISSISSIPPI",
+            "TENNESSEE","ARKANSAS","LOUISIANA","OKLAHOMA","TEXAS")
+
+WEST <- c("ARIZONA","COLORADO","IDAHO","NEW MEXICO","MONTANA",
+            "UTAH","NEVADA","WYOMING","ALASKA","CALIFORNIA",
+            "HAWAII","OREGON","WASHINGTON")
+
+clean_schools %>%
+  mutate(region = if_else(state %in% MIDWEST, "Midwest", 
+                          if_else(state %in% NORTHEAST, "Northeast", 
+                                  if_else(state %in% SOUTH, "South", 
+                                          if_else(state %in% WEST, "West", "Other")))))
+```
+
 
