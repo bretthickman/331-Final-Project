@@ -35,10 +35,29 @@ clean_schools <- clean_schools %>%
 ```
 
 ```{r}
-clean_schools %>%
+clean_schools <- clean_schools %>%
   pivot_longer("G04_A_A_READING":"G08_TR_A_MATHEMATICS",
                names_to = c("grade","race", "sex", "test"),
                names_sep = "_",
                values_to = "count")
 ```
+
+```{r}
+clean_schools <- clean_schools %>%
+  mutate(sex = as.factor(sex),
+         race = fct_recode(as.factor(clean_schools$race), all = "A"),
+         test = as.factor(test),
+         grade =as.factor(grade)
+         )
+  
+```
+
+```{r}
+
+```
+
+
+
+
+
 
