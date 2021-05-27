@@ -42,6 +42,7 @@ clean_schools <- clean_schools %>%
                values_to = "count")
 ```
 
+
 ```{r}
 clean_schools <- clean_schools %>%
   mutate(sex = as.factor(sex),
@@ -52,12 +53,29 @@ clean_schools <- clean_schools %>%
   
 ```
 
+
 ```{r}
+MIDWEST <- c("INDIANA","ILLINOIS","MICHIGAN","OHIO","WISCONSIN",
+             "IOWA","KANSAS","MINNESOTA","MISSOURI","NEBRASKA",
+             "NORTH DAKOTA","SOUTH DAKOTA")
 
+NORTHEAST <- c("CONNECTICUT","MAINE","MASSACHUSETTS","NEW HAMPSHIRE",
+             "RHODE ISLAND","VERMONT","NEW JERSEY","NEW YORK",
+             "PENNSYLVANIA")
+
+SOUTH <- c("DELAWARE","DISTRICT","FLORIDA","GEORGIA",
+            "MARYLAND","NORTH CAROLINA","SOUTH CAROLINA","VIRGINIA",
+            "WEST VIRGINIA","ALABAMA","KENTUCKY","MISSISSIPPI",
+            "TENNESSEE","ARKANSAS","LOUISIANA","OKLAHOMA","TEXAS")
+
+WEST <- c("ARIZONA","COLORADO","IDAHO","NEW MEXICO","MONTANA",
+            "UTAH","NEVADA","WYOMING","ALASKA","CALIFORNIA",
+            "HAWAII","OREGON","WASHINGTON")
+
+clean_schools %>%
+  mutate(region = if_else(state %in% MIDWEST, "Midwest", 
+                          if_else(state %in% NORTHEAST, "Northeast", 
+                                  if_else(state %in% SOUTH, "South", 
+                                          if_else(state %in% WEST, "West", "Other")))))
 ```
-
-
-
-
-
 
