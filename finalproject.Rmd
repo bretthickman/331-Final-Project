@@ -115,14 +115,12 @@ clean_schools %>%
 
 ```{r visuals}
 clean_schools %>%
-  group_by(year) %>%
+  group_by(year, region) %>%
   mutate(avg = mean(INSTRUCTION_EXPENDITURE, na.rm = TRUE)) %>%
   mutate(year = as.numeric(year)) %>%
   filter(!is.na(INSTRUCTION_EXPENDITURE)) %>%
-  group_by(year) %>%
   ggplot()+
-  geom_line(mapping = aes(x = year, y = avg, color = test)) +
-  facet_wrap(~test)
+  geom_line(mapping = aes(x = year, y = avg, color = region))
 ```
 
 
