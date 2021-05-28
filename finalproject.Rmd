@@ -36,6 +36,11 @@ clean_schools <- clean_schools %>%
   separate(PRIMARY_KEY, 
            into = c("year", "state"), 
            sep = " ")
+
+clean_schools$state <- str_replace_all(clean_schools$state, "_", " ")
+
+clean_schools
+
 ```
 
 ```{r}
