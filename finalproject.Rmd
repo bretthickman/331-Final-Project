@@ -28,10 +28,12 @@ clean_schools <-schools %>%
 ```
 
 ```{r}
+clean_schools$PRIMARY_KEY <- str_replace(clean_schools$PRIMARY_KEY,"_", " ")
+
 clean_schools <- clean_schools %>%
   separate(PRIMARY_KEY, 
            into = c("year", "state"), 
-           sep = "_")
+           sep = " ")
 ```
 
 ```{r}
@@ -39,7 +41,7 @@ clean_schools <- clean_schools %>%
   pivot_longer("G04_A_A_READING":"G08_TR_A_MATHEMATICS",
                names_to = c("grade","race", "sex", "test"),
                names_sep = "_",
-               values_to = "count")
+               values_to = "score")
 ```
 
 
@@ -80,11 +82,52 @@ clean_schools <- clean_schools %>%
 
 ```
 
+
+```{r}
+clean_schools %>%
+  ggplot(aes(x = INSTRUCTION_EXPENDITURE, y = score)) +
+  geom_point() +
+  stat_smooth(method = "lm") + 
+  labs(x = "Instructional Expenditures ($)", 
+       y = "Testing scores") +
+  facet_wrap(~region)
+```
+
 ```{r visuals}
 clean_schools %>%
   ggplot()+
-  geom_density(mapping = aes(x = count, fill = test))+
+  geom_density(mapping = aes(x = score, fill = test))+
   labs(title = "Math and Test Scores Density", x = "Test Scores", fill = "Test")
-
 ```
+
+```{r visuals}
+clean_schools %>%
+  mutate(year = as.numeric(year)) %>%
+  filter(!is.na(INSTRUCTION_EXPENDITURE)) %>%
+  group_by(year) %>%
+  ggplot()+
+  geom_point(mapping = aes(x = year, y = INSTRUCTION_EXPENDITURE, color = test))
+```
+
+
+```{r}
+clean_schools %>%
+  filter(test == "MATHEMATICS") %>%
+  lm(score ~ INSTRUCTION_EXPENDITURE, data = .) ->
+  math_model
+
+clean_schools %>%
+  filter(test == "READING") %>%
+  lm(score ~ INSTRUCTION_EXPENDITURE, data = .) ->
+  reading_model
+  
+```
+
+```{r}
+summary(math_model)
+summary(reading_model)
+```
+
+
+
 
