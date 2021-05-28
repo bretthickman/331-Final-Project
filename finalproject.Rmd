@@ -25,13 +25,17 @@ clean_schools <-schools %>%
          CAPITAL_OUTLAY_EXPENDITURE, 
          ends_with("READING"), 
          ends_with("MATHEMATICS"))
+clean_schools
 ```
 
 ```{r}
+
+clean_schools$PRIMARY_KEY <- str_replace(clean_schools$PRIMARY_KEY,"_", " ")
+
 clean_schools <- clean_schools %>%
   separate(PRIMARY_KEY, 
            into = c("year", "state"), 
-           sep = "_")
+           sep = " ")
 ```
 
 ```{r}
@@ -72,19 +76,11 @@ WEST <- c("ARIZONA","COLORADO","IDAHO","NEW MEXICO","MONTANA",
             "UTAH","NEVADA","WYOMING","ALASKA","CALIFORNIA",
             "HAWAII","OREGON","WASHINGTON")
 
-clean_schools <- clean_schools %>%
+clean_schools %>%
   mutate(region = if_else(state %in% MIDWEST, "Midwest", 
                           if_else(state %in% NORTHEAST, "Northeast", 
                                   if_else(state %in% SOUTH, "South", 
                                           if_else(state %in% WEST, "West", "Other")))))
-
 ```
 
-```{r visuals}
-clean_schools %>%
-  ggplot()+
-  geom_density(mapping = aes(x = count, fill = test))+
-  labs(title = "Math and Test Scores Density", x = "Test Scores", fill = "Test")
-
-```
 
