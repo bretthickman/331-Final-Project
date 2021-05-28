@@ -25,7 +25,6 @@ clean_schools <-schools %>%
          CAPITAL_OUTLAY_EXPENDITURE, 
          ends_with("READING"), 
          ends_with("MATHEMATICS"))
-clean_schools
 ```
 
 ```{r}
@@ -39,7 +38,6 @@ clean_schools <- clean_schools %>%
 
 clean_schools$state <- str_replace_all(clean_schools$state, "_", " ")
 
-clean_schools
 
 ```
 
