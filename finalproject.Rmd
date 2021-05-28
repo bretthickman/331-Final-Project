@@ -50,9 +50,9 @@ clean_schools <- clean_schools %>%
   mutate(sex = as.factor(sex),
          race = fct_recode(as.factor(clean_schools$race), all = "A"),
          test = as.factor(test),
-         grade =as.factor(grade)
+         grade =as.factor(grade),
+         year = as.numeric(year)
          )
-  
 ```
 
 
@@ -85,28 +85,44 @@ clean_schools <- clean_schools %>%
 
 ```{r}
 clean_schools %>%
-  ggplot(aes(x = INSTRUCTION_EXPENDITURE, y = score)) +
+  ggplot(aes(x = INSTRUCTION_EXPENDITURE, y = score, color = race)) +
   geom_point() +
-  stat_smooth(method = "lm") + 
   labs(x = "Instructional Expenditures ($)", 
-       y = "Testing scores") +
-  facet_wrap(~region)
+       y = "Testing scores")  +
+  facet_wrap(~race)
+
+clean_schools %>%
+  ggplot(aes(x = INSTRUCTION_EXPENDITURE, y = score, color = sex)) +
+  geom_point() +
+  labs(x = "Instructional Expenditures ($)", 
+       y = "Testing scores")  +
+  facet_wrap(~sex)
 ```
 
 ```{r visuals}
 clean_schools %>%
   ggplot()+
   geom_density(mapping = aes(x = score, fill = test))+
+  facet_wrap(~race) +
+  labs(title = "Math and Test Scores Density", x = "Test Scores", fill = "Test")
+
+clean_schools %>%
+  ggplot()+
+  geom_density(mapping = aes(x = score, fill = test))+
+  facet_wrap(~sex) +
   labs(title = "Math and Test Scores Density", x = "Test Scores", fill = "Test")
 ```
 
 ```{r visuals}
 clean_schools %>%
+  group_by(year) %>%
+  mutate(avg = mean(INSTRUCTION_EXPENDITURE, na.rm = TRUE)) %>%
   mutate(year = as.numeric(year)) %>%
   filter(!is.na(INSTRUCTION_EXPENDITURE)) %>%
   group_by(year) %>%
   ggplot()+
-  geom_point(mapping = aes(x = year, y = INSTRUCTION_EXPENDITURE, color = test))
+  geom_line(mapping = aes(x = year, y = avg, color = test)) +
+  facet_wrap(~test)
 ```
 
 
