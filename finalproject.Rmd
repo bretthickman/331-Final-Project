@@ -26,6 +26,9 @@ clean_schools <-schools %>%
          ends_with("READING"), 
          ends_with("MATHEMATICS"))
 ```
+```{r}
+clean_schools
+```
 
 ```{r}
 
@@ -120,12 +123,15 @@ clean_schools %>%
 
 ```{r visuals}
 clean_schools %>%
-  group_by(year, region) %>%
-  mutate(avg = mean(INSTRUCTION_EXPENDITURE, na.rm = TRUE)) %>%
-  mutate(year = as.numeric(year)) %>%
   filter(!is.na(INSTRUCTION_EXPENDITURE)) %>%
-  ggplot()+
-  geom_line(mapping = aes(x = year, y = avg, color = region))
+  group_by(year, region, race, sex) %>%
+  mutate(
+    avg = mean(INSTRUCTION_EXPENDITURE),
+         year = as.factor(year)
+    ) %>%
+  ggplot(mapping = aes(x = year, y = avg, color = region))+
+  geom_point() +
+  scale_x_discrete(guide = guide_axis(n.dodge=2))
 ```
 
 
