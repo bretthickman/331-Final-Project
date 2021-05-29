@@ -110,28 +110,29 @@ clean_schools %>%
 ```{r visuals}
 clean_schools %>%
   ggplot()+
-  geom_density(mapping = aes(x = score, fill = test))+
+  geom_density(mapping = aes(x = score, fill = test), alpha = 0.5)+
   facet_wrap(~race) +
   labs(title = "Math and Test Scores Density", x = "Test Scores", fill = "Test")
 
 clean_schools %>%
   ggplot()+
-  geom_density(mapping = aes(x = score, fill = test))+
+  geom_density(mapping = aes(x = score, fill = test), alpha = 0.5)+
   facet_wrap(~sex) +
   labs(title = "Math and Test Scores Density", x = "Test Scores", fill = "Test")
 ```
 
 ```{r visuals}
 clean_schools %>%
-  filter(!is.na(INSTRUCTION_EXPENDITURE)) %>%
+  #filter(!is.na(INSTRUCTION_EXPENDITURE)) %>%
   group_by(year, region, race, sex) %>%
   mutate(
-    avg = mean(INSTRUCTION_EXPENDITURE),
+    avg = mean(INSTRUCTION_EXPENDITURE, na.rm = TRUE),
          year = as.factor(year)
     ) %>%
   ggplot(mapping = aes(x = year, y = avg, color = region))+
   geom_point() +
-  scale_x_discrete(guide = guide_axis(n.dodge=2))
+  scale_x_discrete(guide = guide_axis(n.dodge=2)) +#+ facet_wrap(~race) + facet_wrap(~sex)
+  labs(title = "Average Instruction Expenditure over time for the different regions", y = "Average Instruction Expenditure")
 ```
 
 
