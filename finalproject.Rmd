@@ -123,16 +123,45 @@ clean_schools %>%
 
 ```{r visuals}
 clean_schools %>%
-  #filter(!is.na(INSTRUCTION_EXPENDITURE)) %>%
-  group_by(year, region, race, sex) %>%
+  group_by(year, region) %>%
   mutate(
+    INSTRUCTION_EXPENDITURE = INSTRUCTION_EXPENDITURE / 1000000,
     avg = mean(INSTRUCTION_EXPENDITURE, na.rm = TRUE),
+<<<<<<< HEAD
          year = as.factor(year)
     ) %>%
   ggplot(mapping = aes(x = year, y = avg, color = region))+
   geom_point() +
   scale_x_discrete(guide = guide_axis(n.dodge=2)) +#+ facet_wrap(~race) + facet_wrap(~sex)
   labs(title = "Average Instruction Expenditure over time for the different regions", y = "Average Instruction Expenditure", x = "Year")
+=======
+         year = as.factor(year)) %>%
+  ggplot(mapping = aes(x = year, 
+                       y = avg,
+                       group = region,
+                       color = fct_reorder2(region, year, INSTRUCTION_EXPENDITURE)))+
+  geom_line() +
+  scale_x_discrete(guide = guide_axis(n.dodge=2)) +
+  #scale_colour_brewer(palette = "Paired") +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        text=element_text(size=12, 
+                          family="serif"),
+                          axis.text.y = element_text(size = 16))+
+  # code for removing gridlines from https://felixfan.github.io/ggplot2-remove-grid-background-margin/
+  # code for font from https://stackoverflow.com/questions/34522732/changing-fonts-in-ggplot2
+  # annotation from https://ggplot2.tidyverse.org/reference/annotate.html
+  labs(title = "Average Instruction Expenditure Over Time by Region",
+       x = "Year",
+       y = "Average Instruction Expenditure (Millions $)",
+       color = "Region")+
+  annotate("text", 
+           x = "2012", 
+           y = 5.75, 
+           label = "Large increase \n for Northeast",
+           size = 2)
+
+>>>>>>> d36ae62ef5890391d3d5b643a971c24f2e8c31c1
 ```
 
 
@@ -150,4 +179,7 @@ clean_schools %>%
 
 ```
 
+```{r}
+
+```
 
