@@ -120,6 +120,19 @@ clean_schools %>%
   facet_wrap(~sex) +
   labs(title = "Math and Test Scores Density", x = "Test Scores", fill = "Test")
 ```
+```{r}
+clean_schools %>%
+  #filter(!is.na(INSTRUCTION_EXPENDITURE)) %>%
+  group_by(year, region, race, sex) %>%
+  mutate(
+    avg = mean(INSTRUCTION_EXPENDITURE, na.rm = TRUE),
+         year = as.factor(year)
+    ) %>%
+  ggplot(mapping = aes(x = year, y = avg, color = region))+
+  geom_point() +
+  scale_x_discrete(guide = guide_axis(n.dodge=2)) +#+ facet_wrap(~race) + facet_wrap(~sex)
+  labs(title = "Average Instruction Expenditure over time for the different regions", y = "Average Instruction Expenditure", x = "Year")
+```
 
 ```{r visuals}
 clean_schools %>%
@@ -158,19 +171,93 @@ clean_schools %>%
 
 ```{r}
 clean_schools %>%
-  filter(test == "MATHEMATICS") %>%
+  filter(test == "MATHEMATICS",
+         !is.na(score)) %>%
   lm(score ~ INSTRUCTION_EXPENDITURE, data = .) ->
   math_model
 
 clean_schools %>%
-  filter(test == "READING") %>%
+  filter(test == "READING",
+         !is.na(score)) %>%
   lm(score ~ INSTRUCTION_EXPENDITURE, data = .) ->
   reading_model
-  
-
 ```
 
 ```{r}
+summary(math_model)
+# math model has higher r^2
+summary(reading_model)
+```
 
+
+```{r}
+clean_schools %>%
+  lm(score ~ test, data = .) ->
+  test_model
+summary(test_model)
+```
+
+```{r}
+clean_schools %>%
+  mutate(year = as.numeric(year)) %>%
+  lm(score ~ test + year, data = .) %>%
+  summary()
+```
+```{r}
+clean_schools %>%
+  mutate(year = as.numeric(year),
+         state = as.factor(state)) %>%
+  lm(score ~ test + year + SUPPORT_SERVICES_EXPENDITURE, data = .) %>%
+  summary()
+```
+
+```{r}
+clean_schools %>%
+  mutate(year = as.numeric(year)) %>%
+  lm(score ~ test + year + region + SUPPORT_SERVICES_EXPENDITURE, data = .) %>%
+  summary()
+```
+
+```{r}
+clean_schools %>%
+  mutate(year = as.numeric(year)) %>%
+  lm(score ~ test + year + region + SUPPORT_SERVICES_EXPENDITURE + race, data = .) %>%
+  summary()
+```
+
+```{r}
+clean_schools %>%
+  mutate(year = as.numeric(year)) %>%
+  lm(score ~ test + year + region + race, data = .) %>%
+  summary()
+```
+
+```{r}
+clean_schools %>%
+  mutate(year = as.numeric(year)) %>%
+  lm(score ~ test + year + region + SUPPORT_SERVICES_EXPENDITURE + race + grade, data = .) %>%
+  summary()
+```
+
+```{r}
+clean_schools %>%
+  mutate(year = as.numeric(year)) %>%
+  lm(score ~ test + year + region +  race + grade + INSTRUCTION_EXPENDITURE, data = .) %>%
+  summary()
+```
+** Selected model **
+
+```{r}
+clean_schools %>%
+  mutate(year = as.numeric(year)) %>%
+  lm(score ~ test + year + region +  race + grade + INSTRUCTION_EXPENDITURE, data = .) %>%
+  summary()
+```
+
+```{r visualization of model}
+clean_schools %>%
+  mutate(year = as.numeric(year)) %>%
+  ggplot()+
+  geom_point(mapping = aes())
 ```
 
