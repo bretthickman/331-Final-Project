@@ -132,7 +132,7 @@ clean_schools %>%
   ggplot(mapping = aes(x = year, y = avg, color = region))+
   geom_point() +
   scale_x_discrete(guide = guide_axis(n.dodge=2)) +#+ facet_wrap(~race) + facet_wrap(~sex)
-  labs(title = "Average Instruction Expenditure over time for the different regions", y = "Average Instruction Expenditure")
+  labs(title = "Average Instruction Expenditure over time for the different regions", y = "Average Instruction Expenditure", x = "Year")
 ```
 
 
