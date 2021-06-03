@@ -56,7 +56,14 @@ clean_schools <- clean_schools %>%
 ```{r}
 clean_schools <- clean_schools %>%
   mutate(sex = as.factor(sex),
-         race = fct_recode(as.factor(clean_schools$race), all = "A"),
+         race = fct_recode(as.factor(clean_schools$race), 
+                           all = "A",
+                           asian = "AS",
+                           hispanic = "HI",
+                           black = "BL",
+                           white = "WH",
+                           pacific_islander = "HP",
+                           two_or_more = "TR"),
          test = as.factor(test),
          grade =as.factor(grade)
          )
@@ -124,14 +131,13 @@ clean_schools %>%
 clean_schools %>%
   #filter(!is.na(INSTRUCTION_EXPENDITURE)) %>%
   group_by(year, region, race, sex) %>%
-  mutate(
+  mutate( INSTRUCTION_EXPENDITURE = INSTRUCTION_EXPENDITURE / 1000000,
     avg = mean(INSTRUCTION_EXPENDITURE, na.rm = TRUE),
-         year = as.factor(year)
-    ) %>%
+         year = as.factor(year)) %>%
   ggplot(mapping = aes(x = year, y = avg, color = region))+
   geom_point() +
   scale_x_discrete(guide = guide_axis(n.dodge=2)) +#+ facet_wrap(~race) + facet_wrap(~sex)
-  labs(title = "Average Instruction Expenditure over time for the different regions", y = "Average Instruction Expenditure", x = "Year")
+  labs(title = "Average Instruction Expenditure over time for the different regions", y = "Average Instruction Expenditure (in millions $)", x = "Year")
 ```
 
 ```{r visuals}
@@ -259,14 +265,103 @@ clean_schools %>%
 ```{r}
 clean_schools %>%
   mutate(year = as.numeric(year)) %>%
-  lm(score ~ test + year + region +  race + grade + INSTRUCTION_EXPENDITURE, data = .) %>%
+  lm(score ~ test + year + region + race + grade + INSTRUCTION_EXPENDITURE, data = .) %>%
   summary()
 ```
 
-```{r visualization of model}
+```{r visualization of model, echo = FALSE}
 clean_schools %>%
   mutate(year = as.numeric(year)) %>%
-  ggplot()+
-  geom_point(mapping = aes())
+  #filter(race != "all") %>%
+  ggplot(mapping = aes(x = year, 
+                           y = score,
+                           color = race))+
+  geom_point()+
+  geom_jitter()+
+  #stat_smooth(method = "lm")+
+  facet_grid(rows = vars(test), cols = vars(grade))+
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank())
+```
+
+```{r}
+schools_lm <- clean_schools %>%
+  mutate(year = as.numeric(year)) %>%
+  lm(score ~ test + year + region + race + grade + INSTRUCTION_EXPENDITURE, data = .)
+schools_predict <- predict(schools_lm)
+schools_sigma <- sigma(schools_lm)
+```
+
+```{r Function to add Errors}
+noise <- function(x, mean = 0, sd){
+  n <- length(x)
+  new_data <- x + rnorm(n, mean, sd)
+  return(new_data)
+}
+```
+
+```{r Making Tibble of Predictions}
+new_data <- tibble(
+  predict_score = noise(schools_predict,
+                         sd = schools_sigma)
+)
+```
+
+```{r Removing NAs From Observed}
+new_data <- clean_schools %>% 
+  filter(!is.na(score), 
+         !is.na(test), 
+         !is.na(year),
+         !is.na(region),
+         !is.na(race),
+         !is.na(grade),
+         !is.na(INSTRUCTION_EXPENDITURE)) %>% 
+  select(score, test, year, region, race, grade,
+         INSTRUCTION_EXPENDITURE) %>% 
+  bind_cols(new_data)
+```
+
+```{r Iterating Simulations}
+nsims <- 1000
+
+sims <- map_dfc(1:nsims,
+                ~tibble(sim = noise(schools_predict, sd = schools_sigma)))
+```
+
+```{r Replacing column names ... with _}
+colnames(sims) <- colnames(sims) %>% 
+  str_replace(pattern = "\\.\\.\\.",
+                  replace = "_")
+```
+
+```{r Add Observed into Simulated}
+sims <- clean_schools %>% 
+filter(!is.na(score), 
+         !is.na(test), 
+         !is.na(year),
+         !is.na(region),
+         !is.na(race),
+         !is.na(grade),
+         !is.na(INSTRUCTION_EXPENDITURE)) %>%  
+  select(score) %>% 
+  bind_cols(sims)
+```
+
+```{r}
+sim_r_sq <- sims %>% 
+  map( ~lm(score ~ .x, data = sims)) %>% 
+  map(broom::glance) %>% 
+  map_dbl(~.$r.squared)
+```
+
+```{r}
+sim_r_sq <- sim_r_sq[names(sim_r_sq) != "score"]
+head(sim_r_sq)
+```
+
+```{r}
+tibble(sims = sim_r_sq) %>% 
+  ggplot(aes(x = sims)) + 
+  geom_histogram()
 ```
 
