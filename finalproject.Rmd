@@ -181,19 +181,22 @@ clean_schools %>%
 #### Distribution of Test Scores
 Looking at the distribution of test scores, it appears that kids score higher in mathematics than reading, regardless of the grade level. There is a significant jump in test scores for both tests from fourth grade to eighth grade. This is expected as eighth graders have a higher education level and are older than the fourth graders.
 
-```{r initial visuals}
+```{r initial visuals, include = FALSE}
 clean_schools %>%
   ggplot()+
   geom_density(mapping = aes(x = score, fill = test), alpha = 0.5)+
   facet_wrap(~race) +
   labs(title = "Math and Test Scores Density", x = "Test Scores", fill = "Test")
+```
 
+``` {r}
 clean_schools %>%
   ggplot()+
   geom_density(mapping = aes(x = score, fill = test), alpha = 0.5)+
   facet_wrap(~grade) +
   labs(title = "Math and Test Scores Density", x = "Test Scores", fill = "Test")
 ```
+
 ```{r}
 clean_schools %>%
   #filter(!is.na(INSTRUCTION_EXPENDITURE)) %>%
@@ -363,7 +366,7 @@ clean_schools %>%
 ```
 
 
-Since there is only data on the different races after 2010, the graph below looks a little closer into the realtionship between different races.
+Since there is only data on the different races after 2010, the graph below looks a little closer into the relationship between different races. There does seem to be a difference between
 
 ```{r}
 clean_schools %>%
