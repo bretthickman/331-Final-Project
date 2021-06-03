@@ -112,7 +112,7 @@ clean_schools %>%
   facet_wrap(~sex)
 ```
 
-```{r visuals}
+```{r initial visuals}
 clean_schools %>%
   ggplot()+
   geom_density(mapping = aes(x = score, fill = test), alpha = 0.5)+
@@ -134,13 +134,19 @@ clean_schools %>%
          year = as.factor(year)) %>%
   ggplot(mapping = aes(x = year, y = avg, color = region))+
   geom_point() +
-  scale_x_discrete(guide = guide_axis(n.dodge=2)) +#+ facet_wrap(~race) + facet_wrap(~sex)
+  scale_x_discrete(guide = guide_axis(n.dodge=2))+
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        text=element_text(size=12, 
+                          family="serif"),
+                          axis.text.y = element_text(size = 16))+
   labs(title = "Average Instruction Expenditure over time for the different regions", y = "Average Instruction Expenditure (in millions $)", x = "Year")
 ```
 
 ```{r visuals}
 clean_schools %>%
   group_by(year, region) %>%
+  filter(year > 1992 & year < 2017) %>%
   mutate(
     INSTRUCTION_EXPENDITURE = INSTRUCTION_EXPENDITURE / 1000000,
     avg = mean(INSTRUCTION_EXPENDITURE, na.rm = TRUE),
@@ -166,7 +172,7 @@ clean_schools %>%
        color = "Region")+
   annotate("text", 
            x = "2012", 
-           y = 5.75, 
+           y = 7.75, 
            label = "Large increase \n for Northeast",
            size = 2)
 
@@ -254,14 +260,30 @@ clean_schools %>%
 ```{r}
 clean_schools %>%
   mutate(year = as.numeric(year)) %>%
-  lm(score ~ test + year + region + race + grade + INSTRUCTION_EXPENDITURE, data = .) %>%
+  lm(score ~ test + year + region + race + grade , data = .) %>%
   summary()
 ```
+
+## Linear Regression 
+
+#### Model Selection
+For our model selection process our main criteria was adjusted R^2. Since adding any variables, regardless of whether it explains any variation in the data, inflates the R^2. Adjusted R^2 takes this into account and penalizes unnecessary additional variables. We started with a simple linear regression model starting with the test scores as the response variable and the type of test as the explanatory variable. After this baseline model, we added additional variables one-by-one and checked the adjusted R^2 to see if the new variable is useful in the model. We looked for the R^2 to increase at least 3% in order to include it in the model. We did this in order to get the simplest model with the most influential variables.
+
+#### Final Model
+After going through the model selection process, we finalized our multiple linear regression model with the following variables: 
+
+* type of test
+* year
+* region
+* grade
+
+These variables were the most influential according to our model. The visualization below includes all the variables in our final model. It appears that grade followed by the type of test and race are the most influential. 
+
+
 
 ```{r visualization of model, echo = FALSE}
 clean_schools %>%
   mutate(year = as.numeric(year)) %>%
-  #filter(race != "all") %>%
   ggplot(mapping = aes(x = year, 
                            y = score,
                            color = race))+
@@ -272,6 +294,28 @@ clean_schools %>%
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank())
 ```
+
+Since there is only data on the different races after 2010, the graph below looks a little closer into the realtionship between different races.
+
+```{r}
+clean_schools %>%
+  filter(year >= 2010,
+         race != "all") %>%
+  mutate(year = as.factor(year)) %>%
+  ggplot(mapping = aes(x = year, 
+                           y = score,
+                           color = race))+
+  geom_point()+
+  geom_jitter()+
+  stat_smooth(method = "lm")+
+  facet_grid(rows = vars(test), cols = vars(grade))+
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank())
+```
+
+#### Predictive Check
+
+
 
 ```{r}
 schools_lm <- clean_schools %>%
