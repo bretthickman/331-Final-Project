@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = FALSE)
 library(tidyverse)
 library(readxl)
+library(gganimate)
 ```
 
 ```{r}
@@ -138,48 +139,50 @@ clean_schools %>%
   labs(title = "Average Instruction Expenditure over time for the different regions", y = "Average Instruction Expenditure (in millions $)", x = "Year")
 ```
 
-```{r visuals}
+```{r}
 clean_schools %>%
   group_by(year, region) %>%
   mutate(
-    INSTRUCTION_EXPENDITURE = INSTRUCTION_EXPENDITURE / 1000000,
+    INSTRUCTION_EXPENDITURE = INSTRUCTION_EXPENDITURE / 100000,
     avg = mean(INSTRUCTION_EXPENDITURE, na.rm = TRUE),
-<<<<<<< HEAD
-         year = as.factor(year)
-    ) %>%
-  ggplot(mapping = aes(x = year, y = avg, color = region))+
-  geom_point() +
-  scale_x_discrete(guide = guide_axis(n.dodge=2)) +#+ facet_wrap(~race) + facet_wrap(~sex)
-  labs(title = "Average Instruction Expenditure over time for the different regions", y = "Average Instruction Expenditure", x = "Year")
-=======
-         year = as.factor(year)) %>%
-  ggplot(mapping = aes(x = year, 
-                       y = avg,
-                       group = region,
-                       color = fct_reorder2(region, year, INSTRUCTION_EXPENDITURE)))+
+         year = as.integer(year)) %>%
+  ggplot(mapping = aes(x = year, y = avg,
+                       color = region))+
   geom_line() +
-  scale_x_discrete(guide = guide_axis(n.dodge=2)) +
-  #scale_colour_brewer(palette = "Paired") +
-  theme(panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        text=element_text(size=12, 
+  scale_x_continuous(breaks = seq(1992, 2016, 1), 
+                     limits=c(1992, 2016), guide = guide_axis(n.dodge=2)) +
+  theme(text=element_text(size=12, 
                           family="serif"),
                           axis.text.y = element_text(size = 16))+
-  # code for removing gridlines from https://felixfan.github.io/ggplot2-remove-grid-background-margin/
-  # code for font from https://stackoverflow.com/questions/34522732/changing-fonts-in-ggplot2
-  # annotation from https://ggplot2.tidyverse.org/reference/annotate.html
   labs(title = "Average Instruction Expenditure Over Time by Region",
        x = "Year",
        y = "Average Instruction Expenditure (Millions $)",
-       color = "Region")+
-  annotate("text", 
-           x = "2012", 
-           y = 5.75, 
-           label = "Large increase \n for Northeast",
-           size = 2)
-
->>>>>>> d36ae62ef5890391d3d5b643a971c24f2e8c31c1
+       color = "Region") +
+  geom_point(aes(group = seq_along(as.numeric(year)))) +
+  transition_reveal(as.numeric(year))
 ```
+
+
+
+library(gapminder)
+library(gganimate)
+
+clean_schools %>%
+  group_by(year, region, race, sex) %>%
+  mutate( INSTRUCTION_EXPENDITURE = INSTRUCTION_EXPENDITURE / 1000000,
+    avg = mean(INSTRUCTION_EXPENDITURE, na.rm = TRUE),
+    year = as.numeric(year)) %>%
+  
+ggplot(mapping = aes(year, avg, size = avg, colour = region)) +
+  geom_point() +
+  scale_size(range = c(2, 12)) +
+  scale_x_log10() +
+  # Here comes the gganimate specific bits
+  labs(title = 'Year: {frame_time}', x = 'GDP per capita', y = 'life expectancy') +
+  transition_time(year) +
+  transition_reveal(year) +
+  ease_aes('linear')
+
 
 
 ```{r}
@@ -362,4 +365,7 @@ tibble(sims = sim_r_sq) %>%
   ggplot(aes(x = sims)) + 
   geom_histogram()
 ```
+
+
+
 
