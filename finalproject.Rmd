@@ -19,6 +19,7 @@ schools <- read_xlsx("US_schools_data.xlsx")
 
 In this report, the US Schools Data will be investigated to create a linear regression model  (source: https://www.kaggle.com/noriuk/us-education-datasets-unification-project). In this dataset from Urban Institute's API, multiple facets of U.S. educational data was taken from each of the fifty mainland states in the years 1992 to 2017. The data accounts for the states' number of students in a wide variety of grade levels, from pre-kindergarten to grade 12. Additionally, the number of students in different race and sex categories is identified along with the expenditures/revenues in regards to education of each state. Average scores from the Reading and Math NAEP exams were recorded for students in grades 4 and 8.
 
+
 ```{r}
 clean_schools <-schools %>%
   select(PRIMARY_KEY,
@@ -77,6 +78,7 @@ clean_schools <- clean_schools %>%
 To better analyze the similarities and differences with educational systems due to geographical and social distinctions, the states have been categorized into the regions Midwest, Northeast, South, and West. These  labels are the most common way of referring to the nation's differing regions, although, here, we combined Southeast with Southwest into the region South so that the regions have relatively similar number of states (source:https://www.nationalgeographic.org/maps/united-states-regions/)
 
 
+
 ```{r}
 MIDWEST <- c("INDIANA",
              "ILLINOIS",
@@ -95,25 +97,24 @@ NORTHEAST <- c("CONNECTICUT",
                "MAINE",
                "MASSACHUSETTS",
                "NEW HAMPSHIRE",
-               "RHODE ISLAND",
-               "VERMONT",
-               "NEW JERSEY",
-               "NEW YORK",
-               "PENNSYLVANIA")
+             "RHODE ISLAND",
+             "VERMONT",
+             "NEW JERSEY",
+             "NEW YORK",
+             "PENNSYLVANIA")
 
 SOUTH <- c("DELAWARE",
            "DISTRICT",
            "FLORIDA",
            "GEORGIA",
-           "MARYLAND",
+            "MARYLAND",
            "NORTH CAROLINA",
            "SOUTH CAROLINA",
            "VIRGINIA",
-           "WEST VIRGINIA",
-           "ALABAMA",
-           "KENTUCKY",
+            "WEST VIRGINIA",
+           "ALABAMA","KENTUCKY",
            "MISSISSIPPI",
-           "TENNESSEE",
+            "TENNESSEE",
            "ARKANSAS",
            "LOUISIANA",
            "OKLAHOMA",
@@ -124,27 +125,21 @@ WEST <- c("ARIZONA",
           "IDAHO",
           "NEW MEXICO",
           "MONTANA",
-          "UTAH",
+            "UTAH",
           "NEVADA",
           "WYOMING",
           "ALASKA",
           "CALIFORNIA",
-          "HAWAII",
+            "HAWAII",
           "OREGON",
           "WASHINGTON")
 
 clean_schools <- clean_schools %>%
-  mutate(region = 
-           if_else(state %in% MIDWEST, "Midwest",
-                   if_else(state %in% NORTHEAST,
-                           "Northeast",
-                           if_else(
-                             state %in% SOUTH,
-                             "South",
-                             if_else(
-                               state %in% WEST,
-                               "West",
-                               "Other")))))
+  mutate(region = if_else(state %in% MIDWEST, "Midwest", 
+                          if_else(state %in% NORTHEAST, "Northeast", 
+                                  if_else(state %in% SOUTH, "South", 
+                                          if_else(state %in% WEST, "West", "Other")))))
+
 ```
 
 
@@ -164,7 +159,7 @@ clean_schools %>%
   facet_wrap(~sex)
 ```
 
-```{r visuals}
+```{r initial visuals}
 clean_schools %>%
   ggplot()+
   geom_density(mapping = aes(x = score, fill = test), alpha = 0.5)+
@@ -186,13 +181,19 @@ clean_schools %>%
          year = as.factor(year)) %>%
   ggplot(mapping = aes(x = year, y = avg, color = region))+
   geom_point() +
-  scale_x_discrete(guide = guide_axis(n.dodge=2)) +#+ facet_wrap(~race) + facet_wrap(~sex)
+  scale_x_discrete(guide = guide_axis(n.dodge=2))+
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        text=element_text(size=12, 
+                          family="serif"),
+                          axis.text.y = element_text(size = 16))+
   labs(title = "Average Instruction Expenditure over time for the different regions", y = "Average Instruction Expenditure (in millions $)", x = "Year")
 ```
 
 ```{r visuals}
 clean_schools %>%
   group_by(year, region) %>%
+  filter(year > 1992 & year < 2017) %>%
   mutate(
     INSTRUCTION_EXPENDITURE = INSTRUCTION_EXPENDITURE / 1000000,
     avg = mean(INSTRUCTION_EXPENDITURE, na.rm = TRUE),
@@ -218,7 +219,7 @@ clean_schools %>%
        color = "Region")+
   annotate("text", 
            x = "2012", 
-           y = 5.75, 
+           y = 7.75, 
            label = "Large increase \n for Northeast",
            size = 2)
 
@@ -306,14 +307,30 @@ clean_schools %>%
 ```{r}
 clean_schools %>%
   mutate(year = as.numeric(year)) %>%
-  lm(score ~ test + year + region + race + grade + INSTRUCTION_EXPENDITURE, data = .) %>%
+  lm(score ~ test + year + region + race + grade , data = .) %>%
   summary()
 ```
+
+## Linear Regression 
+
+#### Model Selection
+For our model selection process our main criteria was adjusted R^2. Since adding any variables, regardless of whether it explains any variation in the data, inflates the R^2. Adjusted R^2 takes this into account and penalizes unnecessary additional variables. We started with a simple linear regression model starting with the test scores as the response variable and the type of test as the explanatory variable. After this baseline model, we added additional variables one-by-one and checked the adjusted R^2 to see if the new variable is useful in the model. We looked for the R^2 to increase at least 3% in order to include it in the model. We did this in order to get the simplest model with the most influential variables.
+
+#### Final Model
+After going through the model selection process, we finalized our multiple linear regression model with the following variables: 
+
+* type of test
+* year
+* region
+* grade
+
+These variables were the most influential according to our model. The visualization below includes all the variables in our final model. It appears that grade followed by the type of test and race are the most influential. 
+
+
 
 ```{r visualization of model, echo = FALSE}
 clean_schools %>%
   mutate(year = as.numeric(year)) %>%
-  #filter(race != "all") %>%
   ggplot(mapping = aes(x = year, 
                            y = score,
                            color = race))+
@@ -325,8 +342,31 @@ clean_schools %>%
         panel.grid.minor = element_blank())
 ```
 
-## Making Simulations
 
+Since there is only data on the different races after 2010, the graph below looks a little closer into the realtionship between different races.
+
+```{r}
+clean_schools %>%
+  filter(year >= 2010,
+         race != "all") %>%
+  mutate(year = as.factor(year)) %>%
+  ggplot(mapping = aes(x = year, 
+                           y = score,
+                           color = race))+
+  geom_point()+
+  geom_jitter()+
+  stat_smooth(method = "lm")+
+  facet_grid(rows = vars(test), cols = vars(grade))+
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank())
+```
+
+#### Predictive Check
+In order to check 
+
+
+
+## Making Simulations 
 
 ```{r}
 schools_lm <- clean_schools %>%
