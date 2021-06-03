@@ -361,10 +361,6 @@ clean_schools %>%
         panel.grid.minor = element_blank())
 ```
 
-#### Predictive Check
-In order to check 
-
-
 
 ## Making Simulations 
 
