@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 library(tidyverse)
 library(readxl)
 ```
@@ -25,9 +25,6 @@ clean_schools <-schools %>%
          CAPITAL_OUTLAY_EXPENDITURE, 
          ends_with("READING"), 
          ends_with("MATHEMATICS"))
-```
-```{r}
-clean_schools
 ```
 
 ```{r}
@@ -63,7 +60,8 @@ clean_schools <- clean_schools %>%
                            black = "BL",
                            white = "WH",
                            pacific_islander = "HP",
-                           two_or_more = "TR"),
+                           two_or_more = "TR",
+                           native_american = "AM"),
          test = as.factor(test),
          grade =as.factor(grade)
          )
