@@ -325,7 +325,9 @@ clean_schools %>%
         panel.grid.minor = element_blank())
 ```
 
-## Making Simulations 
+## Making Simulations
+
+
 ```{r}
 schools_lm <- clean_schools %>%
   mutate(year = as.numeric(year)) %>%
@@ -406,4 +408,4 @@ tibble(sims = sim_r_sq) %>%
   ggplot(aes(x = sims)) + 
   geom_histogram()
 ```
-
+From the simulation performed above, it is clear that the model describes the relationships of the variables included with a high amount of accuracy. In other words, the model actually accounts for around 85% of the variability in the observed schools data, so that only a small proportion is not accounted for, making this model a relatively good fit. 
