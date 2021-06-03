@@ -15,6 +15,11 @@ library(readxl)
 schools <- read_xlsx("US_schools_data.xlsx")
 ```
 
+## US Schools Dataset
+
+In this report, the US Schools Data will be investigated to create a linear regression model  (source: https://www.kaggle.com/noriuk/us-education-datasets-unification-project). In this dataset from Urban Institute's API, multiple facets of U.S. educational data was taken from each of the fifty mainland states in the years 1992 to 2017. The data accounts for the states' number of students in a wide variety of grade levels, from pre-kindergarten to grade 12. Additionally, the number of students in different race and sex categories is identified along with the expenditures/revenues in regards to education of each state. Average scores from the Reading and Math NAEP exams were recorded for students in grades 4 and 8.
+
+
 ```{r}
 clean_schools <-schools %>%
   select(PRIMARY_KEY,
@@ -68,24 +73,66 @@ clean_schools <- clean_schools %>%
   
 ```
 
+### Regional Categorization
+
+To better analyze the similarities and differences with educational systems due to geographical and social distinctions, the states have been categorized into the regions Midwest, Northeast, South, and West. These  labels are the most common way of referring to the nation's differing regions, although, here, we combined Southeast with Southwest into the region South so that the regions have relatively similar number of states (source:https://www.nationalgeographic.org/maps/united-states-regions/)
+
+
 
 ```{r}
-MIDWEST <- c("INDIANA","ILLINOIS","MICHIGAN","OHIO","WISCONSIN",
-             "IOWA","KANSAS","MINNESOTA","MISSOURI","NEBRASKA",
-             "NORTH DAKOTA","SOUTH DAKOTA")
+MIDWEST <- c("INDIANA",
+             "ILLINOIS",
+             "MICHIGAN",
+             "OHIO",
+             "WISCONSIN",
+             "IOWA",
+             "KANSAS",
+             "MINNESOTA",
+             "MISSOURI",
+             "NEBRASKA",
+             "NORTH DAKOTA",
+             "SOUTH DAKOTA")
 
-NORTHEAST <- c("CONNECTICUT","MAINE","MASSACHUSETTS","NEW HAMPSHIRE",
-             "RHODE ISLAND","VERMONT","NEW JERSEY","NEW YORK",
+NORTHEAST <- c("CONNECTICUT",
+               "MAINE",
+               "MASSACHUSETTS",
+               "NEW HAMPSHIRE",
+             "RHODE ISLAND",
+             "VERMONT",
+             "NEW JERSEY",
+             "NEW YORK",
              "PENNSYLVANIA")
 
-SOUTH <- c("DELAWARE","DISTRICT","FLORIDA","GEORGIA",
-            "MARYLAND","NORTH CAROLINA","SOUTH CAROLINA","VIRGINIA",
-            "WEST VIRGINIA","ALABAMA","KENTUCKY","MISSISSIPPI",
-            "TENNESSEE","ARKANSAS","LOUISIANA","OKLAHOMA","TEXAS")
+SOUTH <- c("DELAWARE",
+           "DISTRICT",
+           "FLORIDA",
+           "GEORGIA",
+            "MARYLAND",
+           "NORTH CAROLINA",
+           "SOUTH CAROLINA",
+           "VIRGINIA",
+            "WEST VIRGINIA",
+           "ALABAMA","KENTUCKY",
+           "MISSISSIPPI",
+            "TENNESSEE",
+           "ARKANSAS",
+           "LOUISIANA",
+           "OKLAHOMA",
+           "TEXAS")
 
-WEST <- c("ARIZONA","COLORADO","IDAHO","NEW MEXICO","MONTANA",
-            "UTAH","NEVADA","WYOMING","ALASKA","CALIFORNIA",
-            "HAWAII","OREGON","WASHINGTON")
+WEST <- c("ARIZONA",
+          "COLORADO",
+          "IDAHO",
+          "NEW MEXICO",
+          "MONTANA",
+            "UTAH",
+          "NEVADA",
+          "WYOMING",
+          "ALASKA",
+          "CALIFORNIA",
+            "HAWAII",
+          "OREGON",
+          "WASHINGTON")
 
 clean_schools <- clean_schools %>%
   mutate(region = if_else(state %in% MIDWEST, "Midwest", 
@@ -295,6 +342,7 @@ clean_schools %>%
         panel.grid.minor = element_blank())
 ```
 
+
 Since there is only data on the different races after 2010, the graph below looks a little closer into the realtionship between different races.
 
 ```{r}
@@ -316,6 +364,9 @@ clean_schools %>%
 #### Predictive Check
 In order to check 
 
+
+
+## Making Simulations 
 
 ```{r}
 schools_lm <- clean_schools %>%
