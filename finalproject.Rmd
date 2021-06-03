@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, results = FALSE, warning = FALSE)
 library(tidyverse)
 library(readxl)
 ```
@@ -144,22 +144,32 @@ clean_schools <- clean_schools %>%
 ```
 
 
+The plot below explores how the differnces in relationship between testing scores and instructional expenditures by region. There doesn't appear to be a relationship that governs all regions. The **West** region has a relationship that increases at lower expenditures, but the decreases as more money is spent before it increases again. The **Northeast** region has the highest testing scores, but the relationship between scores and instructional expenditures is relatively flat. The only region where we see a positive relationship between scores and instructional expenditure is in the **South**.
+
 ```{r}
 clean_schools %>%
   group_by(region) %>%
   ggplot(aes(x = INSTRUCTION_EXPENDITURE, y = score, color = region)) +
   geom_smooth() +
-  labs(x = "Instructional Expenditures ($)", 
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        text=element_text(size=12, 
+                          family="serif"),
+                          axis.text.y = element_text(size = 16))+
+  labs(title = "Test Scores and Instructional Expenditures by Region",
+       x = "Instructional Expenditures (millions $)", 
        y = "Testing scores")  
 
 clean_schools %>%
-  ggplot(aes(x = INSTRUCTION_EXPENDITURE, y = score, color = race)) +
+  ggplot(aes(x = INSTRUCTION_EXPENDITURE, y = score)) +
   #geom_point() +
   geom_smooth() +
-  labs(x = "Instructional Expenditures ($)", 
+  labs(x = "Instructional Expenditures (millions $)", 
        y = "Testing scores")  +
   facet_wrap(~race)
+```
 
+``` {r, include = FALSE}
 clean_schools %>%
   ggplot(aes(x = INSTRUCTION_EXPENDITURE, y = score, color = sex)) +
   geom_point() +
@@ -167,6 +177,9 @@ clean_schools %>%
        y = "Testing scores")  +
   facet_wrap(~sex)
 ```
+
+#### Distribution of Test Scores
+Looking at the distribution of test scores, it appears that kids score higher in mathematics than reading, regardless of the grade level. There is a significant jump in test scores for both tests from fourth grade to eighth grade. This is expected as eighth graders have a higher education level and are older than the fourth graders.
 
 ```{r initial visuals}
 clean_schools %>%
@@ -178,7 +191,7 @@ clean_schools %>%
 clean_schools %>%
   ggplot()+
   geom_density(mapping = aes(x = score, fill = test), alpha = 0.5)+
-  facet_wrap(~sex) +
+  facet_wrap(~grade) +
   labs(title = "Math and Test Scores Density", x = "Test Scores", fill = "Test")
 ```
 ```{r}
@@ -309,9 +322,9 @@ clean_schools %>%
   lm(score ~ test + year + region +  race + grade + INSTRUCTION_EXPENDITURE, data = .) %>%
   summary()
 ```
-** Selected model **
 
-```{r}
+
+```{r final model}
 clean_schools %>%
   mutate(year = as.numeric(year)) %>%
   lm(score ~ test + year + region + race + grade , data = .) %>%
@@ -321,7 +334,7 @@ clean_schools %>%
 ## Linear Regression 
 
 #### Model Selection
-For our model selection process our main criteria was adjusted R^2. Since adding any variables, regardless of whether it explains any variation in the data, inflates the R^2. Adjusted R^2 takes this into account and penalizes unnecessary additional variables. We started with a simple linear regression model starting with the test scores as the response variable and the type of test as the explanatory variable. After this baseline model, we added additional variables one-by-one and checked the adjusted R^2 to see if the new variable is useful in the model. We looked for the R^2 to increase at least 3% in order to include it in the model. We did this in order to get the simplest model with the most influential variables.
+For our model selection process our main criteria was Adjusted R^2^. Since adding any variables, regardless of whether it explains any variation in the data, inflates the R^2^. Adjusted R^2^ takes this into account and penalizes unnecessary additional variables. We started with a simple linear regression model starting with the test scores as the response variable and the type of test as the explanatory variable. After this baseline model, we added additional variables one-by-one and checked the Adjusted R^2^ to see if the new variable is useful in the model. We looked for the Adjusted R^2^ to increase at least 3% in order to include it in the model. We did this in order to get the simplest model with the most influential variables.
 
 #### Final Model
 After going through the model selection process, we finalized our multiple linear regression model with the following variables: 
