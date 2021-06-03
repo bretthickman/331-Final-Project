@@ -68,7 +68,8 @@ clean_schools <- clean_schools %>%
                            two_or_more = "TR",
                            native_american = "AM"),
          test = as.factor(test),
-         grade =as.factor(grade)
+         grade =as.factor(grade),
+         INSTRUCTION_EXPENDITURE = INSTRUCTION_EXPENDITURE / 1000000
          )
   
 ```
@@ -145,8 +146,16 @@ clean_schools <- clean_schools %>%
 
 ```{r}
 clean_schools %>%
+  group_by(region) %>%
+  ggplot(aes(x = INSTRUCTION_EXPENDITURE, y = score, color = region)) +
+  geom_smooth() +
+  labs(x = "Instructional Expenditures ($)", 
+       y = "Testing scores")  
+
+clean_schools %>%
   ggplot(aes(x = INSTRUCTION_EXPENDITURE, y = score, color = race)) +
-  geom_point() +
+  #geom_point() +
+  geom_smooth() +
   labs(x = "Instructional Expenditures ($)", 
        y = "Testing scores")  +
   facet_wrap(~race)
@@ -176,8 +185,7 @@ clean_schools %>%
 clean_schools %>%
   #filter(!is.na(INSTRUCTION_EXPENDITURE)) %>%
   group_by(year, region, race, sex) %>%
-  mutate( INSTRUCTION_EXPENDITURE = INSTRUCTION_EXPENDITURE / 1000000,
-    avg = mean(INSTRUCTION_EXPENDITURE, na.rm = TRUE),
+  mutate(  avg = mean(INSTRUCTION_EXPENDITURE, na.rm = TRUE),
          year = as.factor(year)) %>%
   ggplot(mapping = aes(x = year, y = avg, color = region))+
   geom_point() +
@@ -195,7 +203,6 @@ clean_schools %>%
   group_by(year, region) %>%
   filter(year > 1992 & year < 2017) %>%
   mutate(
-    INSTRUCTION_EXPENDITURE = INSTRUCTION_EXPENDITURE / 1000000,
     avg = mean(INSTRUCTION_EXPENDITURE, na.rm = TRUE),
          year = as.factor(year)) %>%
   ggplot(mapping = aes(x = year, 
