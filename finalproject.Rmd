@@ -364,6 +364,8 @@ clean_schools %>%
 
 ## Making Simulations 
 
+To make the simulations, we created the noise() function to add errors to the predictions, removing missing values and iterating this 1000 times. From there, we added the observed schools data to the simulated data for easier visualization and extracted the R-squared values from each simulation to visualize them with the histogram below. 
+
 ```{r}
 schools_lm <- clean_schools %>%
   mutate(year = as.numeric(year)) %>%
@@ -404,8 +406,9 @@ new_data <- clean_schools %>%
 ```{r Iterating Simulations}
 nsims <- 1000
 
-sims <- map_dfc(1:nsims,
-                ~tibble(sim = noise(schools_predict, sd = schools_sigma)))
+sims <- map_dfc(1:nsims, ~tibble(
+  sim = noise(schools_predict, 
+              sd = schools_sigma)))
 ```
 
 ```{r Replacing column names ... with _}
@@ -444,4 +447,5 @@ tibble(sims = sim_r_sq) %>%
   ggplot(aes(x = sims)) + 
   geom_histogram()
 ```
+
 From the simulation performed above, it is clear that the model describes the relationships of the variables included with a high amount of accuracy. In other words, the model actually accounts for around 85% of the variability in the observed schools data, so that only a small proportion is not accounted for, making this model a relatively good fit. 
