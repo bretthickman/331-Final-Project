@@ -14,6 +14,7 @@ library(readxl)
 ```{r}
 schools <- read_xlsx("US_schools_data.xlsx")
 ```
+# United States Education Data Analysis
 
 ## US Schools Dataset
 
@@ -160,6 +161,7 @@ clean_schools %>%
        x = "Instructional Expenditures (millions $)", 
        y = "Testing scores")  
 
+# I don't think we should include this plot
 clean_schools %>%
   ggplot(aes(x = INSTRUCTION_EXPENDITURE, y = score)) +
   #geom_point() +
@@ -368,6 +370,7 @@ clean_schools %>%
 
 Since there is only data on the different races after 2010, the graph below looks a little closer into the relationship between different races. There does seem to be a difference between
 
+
 ```{r}
 clean_schools %>%
   filter(year >= 2010,
@@ -385,9 +388,9 @@ clean_schools %>%
 ```
 
 
-## Making Simulations 
+## Predictive Check
 
-To make the simulations, we created the noise() function to add errors to the predictions, removing missing values and iterating this 1000 times. From there, we added the observed schools data to the simulated data for easier visualization and extracted the R-squared values from each simulation to visualize them with the histogram below. 
+To make the simulations for the predictive check on our model, we created the noise() function to add errors to the predictions, removing missing values and iterating this 1000 times. From there, we added the observed schools data to the simulated data for easier visualization and extracted the R-squared values from each simulation to visualize them with the histogram below. 
 
 ```{r}
 schools_lm <- clean_schools %>%
