@@ -185,7 +185,7 @@ clean_schools %>%
 ```
 
 #### Distribution of Test Scores
-Looking at the distribution of test scores, it appears that kids score higher in mathematics than reading, regardless of the grade level. There is a significant jump in test scores for both tests from fourth grade to eighth grade. This is expected as eighth graders have a higher education level and are older than the fourth graders.
+Looking at the distribution of test scores, it appears that on average, students score higher in mathematics than reading, regardless of the grade level. There is a significant jump in test scores for both tests from fourth grade to eighth grade. This is expected as eighth graders have a higher education level and are older than the fourth graders.
 
 ```{r initial visuals, include = FALSE}
 clean_schools %>%
@@ -351,16 +351,42 @@ clean_schools %>%
 ```{r, results = "hide"}
 clean_schools %>%
   mutate(year = as.numeric(year)) %>%
-  lm(score ~ test + year + region +  race + grade + INSTRUCTION_EXPENDITURE, data = .) %>%
+  lm(score ~ test + year + region +  race + grade + sex, data = .) %>%
   summary()
-```
 
+
+```
+**What models did you consider? How did you decide that one model was "better" than another model? What are the variables included in your final model?**
+All independent variables were considered. We decided on our model by investigating the p-values corresponding to each of the independent variables. P-values should be less than our set value of alpha in order to pass the hypothesis that the coefficient corresponding to the independent variable is not zero.
+
+We first included all variables into the regression model. The result indicates that the p-values corresponding to TOTAL_EXPENDITURE, INSTRUCTION_EXPENDITURE, SUPPORT_SERVICES_EXPENDITURE and CAPITAL_OUTLAY_EXPENDITURE are greater than alpha, which we set as alpha = 0.05. As a result, we fail to reject the null hypothesis(the coefficient is equal to zero). As a result, we excluded these independent variables from our model. The variables included are: test, year, region, race, grade and sex as they have a much smaller p-value than our set alpha value.
 
 ```{r final model, results = "hide"}
 clean_schools %>%
   mutate(year = as.numeric(year)) %>%
-  lm(score ~ test + year + region + race + grade , data = .) %>%
+  lm(score ~ test + year + region + race + grade + INSTRUCTION_EXPENDITURE, data = .) %>%
   summary()
+```
+
+We chose to go with the model with (test + year + region + race + grade + INSTRUCTION_EXPENDITURE) variables as the independent variables. We noticed that each of these variables significantly impacted the residual standard error as well as the adjusted R-squared values. The addition of SUPPORT_SERVICES_EXPENDITURE didnt significantly affect the residual standard error or the adjusted R-squared values when added with INSTRUCTION_EXPENDITURE. It seems that adding either INSTRUCTION_EXPENDITURE or SUPPORT_SERVICES_EXPENDITURE affects the model similarly, and the addition of the second of these had very little affect. Looking at the plot below, its clear that the support services and intruction expenditures have very similar trends with respect to year; thus affecting the model similarly. Thus, we included INSTRUCTION_EXPENDITURE as it had slightly better results and excluded SUPPORT_SERVICES_EXPENDITURE to avoid redundant execution time.
+
+```{r}
+clean_schools %>%
+  filter(!is.na(SUPPORT_SERVICES_EXPENDITURE)) %>%
+  group_by(year, region) %>%
+  mutate(
+    avg = mean(SUPPORT_SERVICES_EXPENDITURE/1000000, na.rm = TRUE),
+         year = as.numeric(year),
+    region = as.factor(region)
+    ) %>%
+  ggplot(mapping = aes(x = year, y = avg, color = region))+
+  geom_line(alpha = 0.7) +
+  theme(
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        text=element_text(size=12, family="sans"))+
+  scale_x_continuous(breaks = round(seq(min(clean_schools$year), max(clean_schools$year), by = 2),1)) +
+  labs(title = "Average Support Services Expenditure over time for the different regions", y = "Average Support Services Expenditure (in millions $)", x = "Year")
 ```
 
 ## Linear Regression 
@@ -396,8 +422,7 @@ clean_schools %>%
 ```
 
 
-Since there is only data on the different races after 2010, the graph below looks a little closer into the relationship between different races. There does seem to be a difference between
-
+Since there is only data on the different races after 2010, the graph below looks a little closer into the relationship between different races.
 
 ```{r}
 clean_schools %>%
@@ -415,6 +440,26 @@ clean_schools %>%
         panel.grid.minor = element_blank())
 ```
 
+```{r}
+clean_schools %>%
+  filter(year >= 2010,
+         race != "all") %>%
+  mutate(year = as.factor(year)) %>%
+  ggplot(mapping = aes(x = year, 
+                           y = score,
+                           color = grade))+
+  geom_point()+
+  geom_jitter()+
+  stat_smooth(method = "lm")+
+  facet_grid(rows = vars(test), cols = vars(race))+
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank())
+```
+
+**After 2010**
+In general, grade 8 has higher test scores than that of grade 4. In mathematics grade 8 has higher variability than grade 4. while in reading, grade 4 has higher variability than grade 8. It seems like time doesn't influence the grade values or variabilities after 2010. Mathematics grades increase with time until 2010, while reading scores appear to increase in variability after at 2010.
+
+In general, asians, white and and people of two or more races score higher in both mathematics and reading than black, native american, hispanics and pacific islanders. Asians seem to stand out in their mathematics grades. Grade 4 native american students have the lowest reading test scores.
 
 ## Predictive Check
 
