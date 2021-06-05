@@ -202,6 +202,29 @@ clean_schools %>%
   facet_wrap(~grade) +
   labs(title = "Math and Test Scores Density", x = "Test Scores", fill = "Test")
 ```
+```{r}
+clean_schools %>%
+  filter(!is.na(INSTRUCTION_EXPENDITURE)) %>%
+  group_by(year, region) %>%
+  mutate(
+    avg = mean(INSTRUCTION_EXPENDITURE, na.rm = TRUE),
+         year = as.numeric(year),
+    region = as.factor(region)
+    ) %>%
+  ggplot(mapping = aes(x = year, y = avg, color = region))+
+  geom_line(alpha = 0.7) +
+  theme(legend.position="none",
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        text=element_text(size=12, family="sans"))+
+  annotate(geom="text", x=2015, y=10, label="Northeast", color = "darkseagreen4") +
+  annotate(geom="text", x=2000, y=3, label="West", color = "orchid3") +
+  annotate(geom="text", x=1995, y=0.7, label="Other", color = "green4") +
+  annotate(geom="text", x=2005, y=4.5, label="Midwest", color = "darkorange1") +
+  annotate(geom="text", x=2010, y=6.9, label="South", color = "darkturquoise") +
+  scale_x_continuous(breaks = round(seq(min(clean_schools$year), max(clean_schools$year), by = 2),1)) +
+  labs(title = "Average Instruction Expenditure over time for the different regions", y = "Average Instruction Expenditure (in millions $)", x = "Year")
+```
 
 ```{r}
 clean_schools %>%
