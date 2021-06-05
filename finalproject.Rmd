@@ -55,6 +55,9 @@ clean_schools <- clean_schools %>%
                values_to = "score")
 ```
 
+### Race Categorization
+
+In order to more easily visualize the categorization of race, we recoded the race names from abbreviations to their full labels according to the Kaggle description. From the description that the original variable G06_A_A represented the total number of sixth grade students, we determined that "A" also represents "all" students.
 
 ```{r}
 clean_schools <- clean_schools %>%
@@ -99,24 +102,25 @@ NORTHEAST <- c("CONNECTICUT",
                "MAINE",
                "MASSACHUSETTS",
                "NEW HAMPSHIRE",
-             "RHODE ISLAND",
-             "VERMONT",
-             "NEW JERSEY",
-             "NEW YORK",
-             "PENNSYLVANIA")
+               "RHODE ISLAND",
+               "VERMONT",
+               "NEW JERSEY",
+               "NEW YORK",
+               "PENNSYLVANIA")
 
 SOUTH <- c("DELAWARE",
            "DISTRICT",
            "FLORIDA",
            "GEORGIA",
-            "MARYLAND",
+           "MARYLAND",
            "NORTH CAROLINA",
            "SOUTH CAROLINA",
            "VIRGINIA",
-            "WEST VIRGINIA",
-           "ALABAMA","KENTUCKY",
+           "WEST VIRGINIA",
+           "ALABAMA",
+           "KENTUCKY",
            "MISSISSIPPI",
-            "TENNESSEE",
+           "TENNESSEE",
            "ARKANSAS",
            "LOUISIANA",
            "OKLAHOMA",
@@ -127,12 +131,12 @@ WEST <- c("ARIZONA",
           "IDAHO",
           "NEW MEXICO",
           "MONTANA",
-            "UTAH",
+          "UTAH",
           "NEVADA",
           "WYOMING",
           "ALASKA",
           "CALIFORNIA",
-            "HAWAII",
+          "HAWAII",
           "OREGON",
           "WASHINGTON")
 
@@ -272,20 +276,20 @@ summary(reading_model)
 ```
 
 
-```{r}
+```{r, results = "hide"}
 clean_schools %>%
   lm(score ~ test, data = .) ->
   test_model
 summary(test_model)
 ```
 
-```{r}
+```{r, results = "hide"}
 clean_schools %>%
   mutate(year = as.numeric(year)) %>%
   lm(score ~ test + year, data = .) %>%
   summary()
 ```
-```{r}
+```{r, results = "hide"}
 clean_schools %>%
   mutate(year = as.numeric(year),
          state = as.factor(state)) %>%
@@ -293,35 +297,35 @@ clean_schools %>%
   summary()
 ```
 
-```{r}
+```{r, results = "hide"}
 clean_schools %>%
   mutate(year = as.numeric(year)) %>%
   lm(score ~ test + year + region + SUPPORT_SERVICES_EXPENDITURE, data = .) %>%
   summary()
 ```
 
-```{r}
+```{r, results = "hide"}
 clean_schools %>%
   mutate(year = as.numeric(year)) %>%
   lm(score ~ test + year + region + SUPPORT_SERVICES_EXPENDITURE + race, data = .) %>%
   summary()
 ```
 
-```{r}
+```{r, results = "hide"}
 clean_schools %>%
   mutate(year = as.numeric(year)) %>%
   lm(score ~ test + year + region + race, data = .) %>%
   summary()
 ```
 
-```{r}
+```{r, results = "hide"}
 clean_schools %>%
   mutate(year = as.numeric(year)) %>%
   lm(score ~ test + year + region + SUPPORT_SERVICES_EXPENDITURE + race + grade, data = .) %>%
   summary()
 ```
 
-```{r}
+```{r, results = "hide"}
 clean_schools %>%
   mutate(year = as.numeric(year)) %>%
   lm(score ~ test + year + region +  race + grade + INSTRUCTION_EXPENDITURE, data = .) %>%
@@ -329,7 +333,7 @@ clean_schools %>%
 ```
 
 
-```{r final model}
+```{r final model, results = "hide"}
 clean_schools %>%
   mutate(year = as.numeric(year)) %>%
   lm(score ~ test + year + region + race + grade , data = .) %>%
@@ -362,7 +366,8 @@ clean_schools %>%
   geom_point()+
   geom_jitter()+
   #stat_smooth(method = "lm")+
-  facet_grid(rows = vars(test), cols = vars(grade))+
+  facet_grid(rows = vars(test),
+             cols = vars(grade))+
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank())
 ```
