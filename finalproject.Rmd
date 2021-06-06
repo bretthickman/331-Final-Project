@@ -466,7 +466,7 @@ clean_schools %>%
 ```
 
 
-In general, grade 8 has higher test scores than that of grade 4. In mathematics grade 8 has higher variability than grade 4. while in reading, grade 4 has higher variability than grade 8. It seems like time doesn't influence the grade values or variabilities after 2010. Mathematics grades increase with time until 2010, while reading scores appear to increase in variability after at 2010.
+In general, grade 8 has higher test scores than that of grade 4. In mathematics grade 8 has higher variability than grade 4. while in reading, grade 4 has higher variability than grade 8. It seems like time doesn't influence the grade values or variabilities after 2010. Mathematics grades increase with time until 2010, while reading scores appear to increase in variability at 2010.
 
 In general, asians, white and and people of two or more races score higher in both mathematics and reading than black, native american, hispanics and pacific islanders. Asians seem to stand out in their mathematics grades. Grade 4 native american students have the lowest reading test scores.
 
