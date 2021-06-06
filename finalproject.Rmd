@@ -387,30 +387,7 @@ After going through the model selection process, we finalized our multiple linea
 * race
 * grade
 
-We chose to go with the model with (test + year + region + race + grade + INSTRUCTION_EXPENDITURE) variables as the independent variables. We noticed that each of these variables significantly impacted the residual standard error as well as the adjusted R-squared values. The addition of SUPPORT_SERVICES_EXPENDITURE did not significantly affect the residual standard error or the adjusted R-squared values when added with INSTRUCTION_EXPENDITURE. It seems that adding either INSTRUCTION_EXPENDITURE or SUPPORT_SERVICES_EXPENDITURE affects the model similarly, and the addition of the second of these had very little affect. Looking at the plot below, its clear that the support services and instruction expenditures have very similar trends with respect to year; thus affecting the model similarly. Thus, we included INSTRUCTION_EXPENDITURE as it had slightly better results and excluded SUPPORT_SERVICES_EXPENDITURE to avoid redundant execution time.
 
-```{r}
-clean_schools %>%
-  filter(!is.na(SUPPORT_SERVICES_EXPENDITURE)) %>%
-  group_by(year, region) %>%
-  mutate(SUPPORT_SERVICES_EXPENDITURE = SUPPORT_SERVICES_EXPENDITURE / 1000000,
-    avg = mean(SUPPORT_SERVICES_EXPENDITURE, na.rm = TRUE),
-         year = as.numeric(year),
-    region = as.factor(region)
-    ) %>%
-  ggplot(mapping = aes(x = year, y = avg, color = region))+
-  geom_line(alpha = 0.7) +
-  theme(
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        text=element_text(size=12, 
-                          family="serif"))+
-  scale_x_continuous(breaks = round(seq(min(clean_schools$year), max(clean_schools$year), by = 2),1)) +
-  labs(title = "Average Support Services Expenditure over time for the different regions", 
-       y = "Average Support Services Expenditure (in millions $)", 
-       x = "Year",
-       color = "Region")
-```
 
 **The visualization below includes all the variables in our final model.** It appears that grade followed by the type of test and race are the most influential. 
 
@@ -488,7 +465,7 @@ clean_schools %>%
        y = "Test Score")
 ```
 
-**After 2010**
+
 In general, grade 8 has higher test scores than that of grade 4. In mathematics grade 8 has higher variability than grade 4. while in reading, grade 4 has higher variability than grade 8. It seems like time doesn't influence the grade values or variabilities after 2010. Mathematics grades increase with time until 2010, while reading scores appear to increase in variability after at 2010.
 
 In general, asians, white and and people of two or more races score higher in both mathematics and reading than black, native american, hispanics and pacific islanders. Asians seem to stand out in their mathematics grades. Grade 4 native american students have the lowest reading test scores.
