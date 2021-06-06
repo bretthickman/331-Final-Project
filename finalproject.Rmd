@@ -149,7 +149,7 @@ clean_schools <- clean_schools %>%
 ```
 
 
-The plot below explores how the differnces in relationship between testing scores and instructional expenditures by region. There doesn't appear to be a relationship that governs all regions. The **West** region has a relationship that increases at lower expenditures, but the decreases as more money is spent before it increases again. The **Northeast** region has the highest testing scores, but the relationship between scores and instructional expenditures is relatively flat. The only region where we see a positive relationship between scores and instructional expenditure is in the **South**.
+The plot below explores how the differences in relationship between testing scores and instructional expenditures by region. There doesn't appear to be a relationship that governs all regions. The **West** region has a relationship that increases at lower expenditures, but the decreases as more money is spent before it increases again. The **Northeast** region has the highest testing scores, but the relationship between scores and instructional expenditures is relatively flat. The only region where we see a positive relationship between scores and instructional expenditure is in the **South**.
 
 ```{r}
 clean_schools %>%
@@ -164,8 +164,9 @@ clean_schools %>%
   labs(title = "Test Scores and Instructional Expenditures by Region",
        x = "Instructional Expenditures (millions $)", 
        y = "Testing scores")  
+```
 
-# I don't think we should include this plot
+```{r, include = FALSE}
 clean_schools %>%
   ggplot(aes(x = INSTRUCTION_EXPENDITURE, y = score)) +
   #geom_point() +
@@ -200,9 +201,11 @@ clean_schools %>%
   ggplot()+
   geom_density(mapping = aes(x = score, fill = test), alpha = 0.5)+
   facet_wrap(~grade) +
+  theme(text=element_text(size=12, 
+                          family="serif"))+
   labs(title = "Math and Test Scores Density", x = "Test Scores", fill = "Test")
 ```
-```{r}
+```{r, include = FALSE}
 clean_schools %>%
   filter(!is.na(INSTRUCTION_EXPENDITURE)) %>%
   group_by(year, region) %>%
@@ -226,7 +229,7 @@ clean_schools %>%
   labs(title = "Average Instruction Expenditure over time for the different regions", y = "Average Instruction Expenditure (in millions $)", x = "Year")
 ```
 
-```{r}
+```{r, include = FALSE}
 clean_schools %>%
   #filter(!is.na(INSTRUCTION_EXPENDITURE)) %>%
   group_by(year, region, race, sex) %>%
@@ -239,7 +242,7 @@ clean_schools %>%
         panel.grid.minor = element_blank(),
         text=element_text(size=12, 
                           family="serif"),
-                          axis.text.y = element_text(size = 16))+
+        axis.text.y = element_text(size = 16))+
   labs(title = "Average Instruction Expenditure over time for the different regions", y = "Average Instruction Expenditure (in millions $)", x = "Year")
 ```
 
@@ -261,7 +264,7 @@ clean_schools %>%
         panel.grid.minor = element_blank(),
         text=element_text(size=12, 
                           family="serif"),
-                          axis.text.y = element_text(size = 16))+
+        axis.text.y = element_text(size = 16))+
   # code for removing gridlines from https://felixfan.github.io/ggplot2-remove-grid-background-margin/
   # code for font from https://stackoverflow.com/questions/34522732/changing-fonts-in-ggplot2
   # annotation from https://ggplot2.tidyverse.org/reference/annotate.html
@@ -356,10 +359,6 @@ clean_schools %>%
 
 
 ```
-**What models did you consider? How did you decide that one model was "better" than another model? What are the variables included in your final model?**
-All independent variables were considered. We decided on our model by investigating the p-values corresponding to each of the independent variables. P-values should be less than our set value of alpha in order to pass the hypothesis that the coefficient corresponding to the independent variable is not zero.
-
-We first included all variables into the regression model. The result indicates that the p-values corresponding to TOTAL_EXPENDITURE, INSTRUCTION_EXPENDITURE, SUPPORT_SERVICES_EXPENDITURE and CAPITAL_OUTLAY_EXPENDITURE are greater than alpha, which we set as alpha = 0.05. As a result, we fail to reject the null hypothesis(the coefficient is equal to zero). As a result, we excluded these independent variables from our model. The variables included are: test, year, region, race, grade and sex as they have a much smaller p-value than our set alpha value.
 
 ```{r final model, results = "hide"}
 clean_schools %>%
@@ -368,14 +367,34 @@ clean_schools %>%
   summary()
 ```
 
-We chose to go with the model with (test + year + region + race + grade + INSTRUCTION_EXPENDITURE) variables as the independent variables. We noticed that each of these variables significantly impacted the residual standard error as well as the adjusted R-squared values. The addition of SUPPORT_SERVICES_EXPENDITURE didnt significantly affect the residual standard error or the adjusted R-squared values when added with INSTRUCTION_EXPENDITURE. It seems that adding either INSTRUCTION_EXPENDITURE or SUPPORT_SERVICES_EXPENDITURE affects the model similarly, and the addition of the second of these had very little affect. Looking at the plot below, its clear that the support services and intruction expenditures have very similar trends with respect to year; thus affecting the model similarly. Thus, we included INSTRUCTION_EXPENDITURE as it had slightly better results and excluded SUPPORT_SERVICES_EXPENDITURE to avoid redundant execution time.
+
+## Linear Regression 
+
+#### Model Selection
+For our model selection process our main criteria was Adjusted R^2^. Since adding any variables, regardless of whether it explains any variation in the data, inflates the R^2^. Adjusted R^2^ takes this into account and penalizes unnecessary additional variables. We started with a simple linear regression model starting with the test scores as the response variable and the type of test as the explanatory variable. After this baseline model, we added additional variables one-by-one and checked the Adjusted R^2^ to see if the new variable is useful in the model. We looked for the Adjusted R^2^ to increase at least 3% in order to include it in the model. We did this in order to get the simplest model with the most influential variables.
+
+All independent variables were considered. We decided on our model by investigating the p-values corresponding to each of the independent variables as well. P-values should be less than our set value of alpha in order to pass the hypothesis that the coefficient corresponding to the independent variable is not zero.
+
+The result indicates that the p-values corresponding to TOTAL_EXPENDITURE, INSTRUCTION_EXPENDITURE, SUPPORT_SERVICES_EXPENDITURE and CAPITAL_OUTLAY_EXPENDITURE are greater than alpha, which we set as alpha = 0.05. As a result, we fail to reject the null hypothesis(the coefficient is equal to zero). As a result, we excluded these independent variables from our model.
+
+#### Final Model
+
+After going through the model selection process, we finalized our multiple linear regression model with the following variables: 
+
+* type of test
+* year
+* region
+* race
+* grade
+
+We chose to go with the model with (test + year + region + race + grade + INSTRUCTION_EXPENDITURE) variables as the independent variables. We noticed that each of these variables significantly impacted the residual standard error as well as the adjusted R-squared values. The addition of SUPPORT_SERVICES_EXPENDITURE did not significantly affect the residual standard error or the adjusted R-squared values when added with INSTRUCTION_EXPENDITURE. It seems that adding either INSTRUCTION_EXPENDITURE or SUPPORT_SERVICES_EXPENDITURE affects the model similarly, and the addition of the second of these had very little affect. Looking at the plot below, its clear that the support services and instruction expenditures have very similar trends with respect to year; thus affecting the model similarly. Thus, we included INSTRUCTION_EXPENDITURE as it had slightly better results and excluded SUPPORT_SERVICES_EXPENDITURE to avoid redundant execution time.
 
 ```{r}
 clean_schools %>%
   filter(!is.na(SUPPORT_SERVICES_EXPENDITURE)) %>%
   group_by(year, region) %>%
-  mutate(
-    avg = mean(SUPPORT_SERVICES_EXPENDITURE/1000000, na.rm = TRUE),
+  mutate(SUPPORT_SERVICES_EXPENDITURE = SUPPORT_SERVICES_EXPENDITURE / 1000000,
+    avg = mean(SUPPORT_SERVICES_EXPENDITURE, na.rm = TRUE),
          year = as.numeric(year),
     region = as.factor(region)
     ) %>%
@@ -384,25 +403,16 @@ clean_schools %>%
   theme(
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
-        text=element_text(size=12, family="sans"))+
+        text=element_text(size=12, 
+                          family="serif"))+
   scale_x_continuous(breaks = round(seq(min(clean_schools$year), max(clean_schools$year), by = 2),1)) +
-  labs(title = "Average Support Services Expenditure over time for the different regions", y = "Average Support Services Expenditure (in millions $)", x = "Year")
+  labs(title = "Average Support Services Expenditure over time for the different regions", 
+       y = "Average Support Services Expenditure (in millions $)", 
+       x = "Year",
+       color = "Region")
 ```
 
-## Linear Regression 
-
-#### Model Selection
-For our model selection process our main criteria was Adjusted R^2^. Since adding any variables, regardless of whether it explains any variation in the data, inflates the R^2^. Adjusted R^2^ takes this into account and penalizes unnecessary additional variables. We started with a simple linear regression model starting with the test scores as the response variable and the type of test as the explanatory variable. After this baseline model, we added additional variables one-by-one and checked the Adjusted R^2^ to see if the new variable is useful in the model. We looked for the Adjusted R^2^ to increase at least 3% in order to include it in the model. We did this in order to get the simplest model with the most influential variables.
-
-#### Final Model
-After going through the model selection process, we finalized our multiple linear regression model with the following variables: 
-
-* type of test
-* year
-* region
-* grade
-
-These variables were the most influential according to our model. The visualization below includes all the variables in our final model. It appears that grade followed by the type of test and race are the most influential. 
+**The visualization below includes all the variables in our final model.** It appears that grade followed by the type of test and race are the most influential. 
 
 
 
@@ -418,7 +428,14 @@ clean_schools %>%
   facet_grid(rows = vars(test),
              cols = vars(grade))+
   theme(panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank())
+        panel.grid.minor = element_blank(),
+        text=element_text(size=12, 
+                          family="serif")
+        )+
+  labs(title = "Final Model Explaining Test Scores",
+       color = "Race",
+       x = "Year",
+       y = "Test Score")
 ```
 
 
@@ -436,11 +453,18 @@ clean_schools %>%
   geom_jitter()+
   stat_smooth(method = "lm")+
   facet_grid(rows = vars(test), cols = vars(grade))+
+  scale_x_discrete(guide = guide_axis(n.dodge=2)) +
   theme(panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank())
+        panel.grid.minor = element_blank(),
+        text=element_text(size=12, 
+                          family="serif"))+
+  labs(title = "Testing Scores by Race",
+       color = "Race",
+       x = "Year",
+       y = "Test Score")
 ```
 
-```{r}
+```{r, fig.width = 10}
 clean_schools %>%
   filter(year >= 2010,
          race != "all") %>%
@@ -452,8 +476,16 @@ clean_schools %>%
   geom_jitter()+
   stat_smooth(method = "lm")+
   facet_grid(rows = vars(test), cols = vars(race))+
+  scale_x_discrete(guide = guide_axis(n.dodge=2)) +
   theme(panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank())
+        panel.grid.minor = element_blank(),
+        text=element_text(size=15, 
+                          family="serif"),
+                          axis.text.x = element_text(size = 8))+
+  labs(title = "Testing Scores by Race after 2010",
+       color = "Grade",
+       x = "Year",
+       y = "Test Score")
 ```
 
 **After 2010**
