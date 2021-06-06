@@ -160,7 +160,7 @@ clean_schools %>%
         panel.grid.minor = element_blank(),
         text=element_text(size=12, 
                           family="serif"),
-                          axis.text.y = element_text(size = 16))+
+                          axis.text.y = element_text(size = 16)) +
   labs(title = "Test Scores and Instructional Expenditures by Region",
        x = "Instructional Expenditures (millions $)", 
        y = "Testing scores")  
@@ -190,8 +190,8 @@ Looking at the distribution of test scores, it appears that on average, students
 
 ```{r initial visuals, include = FALSE}
 clean_schools %>%
-  ggplot()+
-  geom_density(mapping = aes(x = score, fill = test), alpha = 0.5)+
+  ggplot() +
+  geom_density(mapping = aes(x = score, fill = test), alpha = 0.5) +
   facet_wrap(~race) +
   labs(title = "Math and Test Scores Density", x = "Test Scores", fill = "Test")
 ```
@@ -199,10 +199,10 @@ clean_schools %>%
 ``` {r}
 clean_schools %>%
   ggplot()+
-  geom_density(mapping = aes(x = score, fill = test), alpha = 0.5)+
+  geom_density(mapping = aes(x = score, fill = test), alpha = 0.5) +
   facet_wrap(~grade) +
   theme(text=element_text(size=12, 
-                          family="serif"))+
+                          family="serif")) +
   labs(title = "Math and Test Scores Density", x = "Test Scores", fill = "Test")
 ```
 ```{r, include = FALSE}
@@ -398,17 +398,17 @@ clean_schools %>%
   mutate(year = as.numeric(year)) %>%
   ggplot(mapping = aes(x = year, 
                            y = score,
-                           color = race))+
+                           color = race)) +
   geom_point()+
   geom_jitter()+
-  #stat_smooth(method = "lm")+
+  #stat_smooth(method = "lm") +
   facet_grid(rows = vars(test),
-             cols = vars(grade))+
+             cols = vars(grade)) +
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         text=element_text(size=12, 
                           family="serif")
-        )+
+        ) +
   labs(title = "Final Model Explaining Test Scores",
        color = "Race",
        x = "Year",
@@ -418,47 +418,65 @@ clean_schools %>%
 
 Since there is only data on the different races after 2010, the graph below looks a little closer into the relationship between different races.
 
-```{r}
+```{r Making everysecond Function, include = FALSE}
+everysecond <- function(x){
+  x <- sort(unique(x))
+  x[seq(2, length(x), 2)] <- ""
+  x
+}
+#source: https://community.rstudio.com/t/how-to-automatically-skip-some-x-labels/65702/4)
+```
+
+
+```{r, fig.width = 6}
 clean_schools %>%
   filter(year >= 2010,
          race != "all") %>%
   mutate(year = as.factor(year)) %>%
   ggplot(mapping = aes(x = year, 
                            y = score,
-                           color = race))+
-  geom_point()+
-  geom_jitter()+
+                           color = race)) +
+  geom_point() +
+  geom_jitter() +
   stat_smooth(method = "lm")+
-  facet_grid(rows = vars(test), cols = vars(grade))+
-  scale_x_discrete(guide = guide_axis(n.dodge=2)) +
+  facet_grid(rows = vars(test),
+             cols = vars(grade)) +
+  scale_x_discrete(
+    labels = everysecond(clean_schools$year)
+    ) +
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         text=element_text(size=12, 
-                          family="serif"))+
+                          family="serif")) +
   labs(title = "Testing Scores by Race",
        color = "Race",
        x = "Year",
        y = "Test Score")
 ```
 
-```{r, fig.width = 10}
+
+
+
+```{r, fig.width = 15}
 clean_schools %>%
   filter(year >= 2010,
          race != "all") %>%
   mutate(year = as.factor(year)) %>%
   ggplot(mapping = aes(x = year, 
                            y = score,
-                           color = grade))+
-  geom_point()+
-  geom_jitter()+
+                           color = grade)) +
+  geom_point() +
+  geom_jitter() +
   stat_smooth(method = "lm")+
-  facet_grid(rows = vars(test), cols = vars(race))+
-  scale_x_discrete(guide = guide_axis(n.dodge=2)) +
+  facet_grid(rows = vars(test), cols = vars(race)) +
+  scale_x_discrete(
+    labels = everysecond(clean_schools$year)
+    ) +
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         text=element_text(size=15, 
                           family="serif"),
-                          axis.text.x = element_text(size = 8))+
+                          axis.text.x = element_text(size = 8)) +
   labs(title = "Testing Scores by Race after 2010",
        color = "Grade",
        x = "Year",
@@ -553,7 +571,14 @@ head(sim_r_sq)
 ```{r}
 tibble(sims = sim_r_sq) %>% 
   ggplot(aes(x = sims)) + 
-  geom_histogram()
+  geom_histogram() +
+   theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        text=element_text(size=12, 
+                          family="serif")) +
+  labs(
+    title = "Distribution of Simulated R-Sqaured",
+       x = "R-Squared")
 ```
 
 From the simulation performed above, it is clear that the model describes the relationships of the variables included with a high amount of accuracy. In other words, the model actually accounts for around 85% of the variability in the observed schools data, so that only a small proportion is not accounted for, making this model a relatively good fit. 
