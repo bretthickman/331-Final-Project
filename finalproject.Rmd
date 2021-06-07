@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, message = FALSE, results = FALSE, warning = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, results = FALSE, warning = FALSE, fig.align = 'center')
 library(tidyverse)
 library(readxl)
 library(gganimate)
@@ -15,6 +15,7 @@ library(gganimate)
 ```{r}
 schools <- read_xlsx("US_schools_data.xlsx")
 ```
+# United States Education Data Analysis
 
 ## US Schools Dataset
 
@@ -55,6 +56,9 @@ clean_schools <- clean_schools %>%
                values_to = "score")
 ```
 
+### Race Categorization
+
+In order to more easily visualize the categorization of race, we recoded the race names from abbreviations to their full labels according to the Kaggle description. From the description that the original variable G06_A_A represented the total number of sixth grade students, we determined that "A" also represents "all" students.
 
 ```{r}
 clean_schools <- clean_schools %>%
@@ -99,24 +103,25 @@ NORTHEAST <- c("CONNECTICUT",
                "MAINE",
                "MASSACHUSETTS",
                "NEW HAMPSHIRE",
-             "RHODE ISLAND",
-             "VERMONT",
-             "NEW JERSEY",
-             "NEW YORK",
-             "PENNSYLVANIA")
+               "RHODE ISLAND",
+               "VERMONT",
+               "NEW JERSEY",
+               "NEW YORK",
+               "PENNSYLVANIA")
 
 SOUTH <- c("DELAWARE",
            "DISTRICT",
            "FLORIDA",
            "GEORGIA",
-            "MARYLAND",
+           "MARYLAND",
            "NORTH CAROLINA",
            "SOUTH CAROLINA",
            "VIRGINIA",
-            "WEST VIRGINIA",
-           "ALABAMA","KENTUCKY",
+           "WEST VIRGINIA",
+           "ALABAMA",
+           "KENTUCKY",
            "MISSISSIPPI",
-            "TENNESSEE",
+           "TENNESSEE",
            "ARKANSAS",
            "LOUISIANA",
            "OKLAHOMA",
@@ -127,12 +132,12 @@ WEST <- c("ARIZONA",
           "IDAHO",
           "NEW MEXICO",
           "MONTANA",
-            "UTAH",
+          "UTAH",
           "NEVADA",
           "WYOMING",
           "ALASKA",
           "CALIFORNIA",
-            "HAWAII",
+          "HAWAII",
           "OREGON",
           "WASHINGTON")
 
@@ -145,7 +150,7 @@ clean_schools <- clean_schools %>%
 ```
 
 
-The plot below explores how the differnces in relationship between testing scores and instructional expenditures by region. There doesn't appear to be a relationship that governs all regions. The **West** region has a relationship that increases at lower expenditures, but the decreases as more money is spent before it increases again. The **Northeast** region has the highest testing scores, but the relationship between scores and instructional expenditures is relatively flat. The only region where we see a positive relationship between scores and instructional expenditure is in the **South**.
+The plot below explores how the differences in relationship between testing scores and instructional expenditures by region. There doesn't appear to be a relationship that governs all regions. The **West** region has a relationship that increases at lower expenditures, but the decreases as more money is spent before it increases again. The **Northeast** region has the highest testing scores, but the relationship between scores and instructional expenditures is relatively flat. The only region where we see a positive relationship between scores and instructional expenditure is in the **South**.
 
 ```{r}
 clean_schools %>%
@@ -156,11 +161,13 @@ clean_schools %>%
         panel.grid.minor = element_blank(),
         text=element_text(size=12, 
                           family="serif"),
-                          axis.text.y = element_text(size = 16))+
+                          axis.text.y = element_text(size = 16)) +
   labs(title = "Test Scores and Instructional Expenditures by Region",
        x = "Instructional Expenditures (millions $)", 
        y = "Testing scores")  
+```
 
+```{r, include = FALSE}
 clean_schools %>%
   ggplot(aes(x = INSTRUCTION_EXPENDITURE, y = score)) +
   #geom_point() +
@@ -180,12 +187,12 @@ clean_schools %>%
 ```
 
 #### Distribution of Test Scores
-Looking at the distribution of test scores, it appears that kids score higher in mathematics than reading, regardless of the grade level. There is a significant jump in test scores for both tests from fourth grade to eighth grade. This is expected as eighth graders have a higher education level and are older than the fourth graders.
+Looking at the distribution of test scores, it appears that on average, students score higher in mathematics than reading, regardless of the grade level. There is a significant jump in test scores for both tests from fourth grade to eighth grade. This is expected as eighth graders have a higher education level and are older than the fourth graders.
 
 ```{r initial visuals, include = FALSE}
 clean_schools %>%
-  ggplot()+
-  geom_density(mapping = aes(x = score, fill = test), alpha = 0.5)+
+  ggplot() +
+  geom_density(mapping = aes(x = score, fill = test), alpha = 0.5) +
   facet_wrap(~race) +
   labs(title = "Math and Test Scores Density", x = "Test Scores", fill = "Test")
 ```
@@ -193,12 +200,37 @@ clean_schools %>%
 ``` {r}
 clean_schools %>%
   ggplot()+
-  geom_density(mapping = aes(x = score, fill = test), alpha = 0.5)+
+  geom_density(mapping = aes(x = score, fill = test), alpha = 0.5) +
   facet_wrap(~grade) +
+  theme(text=element_text(size=12, 
+                          family="serif")) +
   labs(title = "Math and Test Scores Density", x = "Test Scores", fill = "Test")
 ```
+```{r, include = FALSE}
+clean_schools %>%
+  filter(!is.na(INSTRUCTION_EXPENDITURE)) %>%
+  group_by(year, region) %>%
+  mutate(
+    avg = mean(INSTRUCTION_EXPENDITURE, na.rm = TRUE),
+         year = as.numeric(year),
+    region = as.factor(region)
+    ) %>%
+  ggplot(mapping = aes(x = year, y = avg, color = region))+
+  geom_line(alpha = 0.7) +
+  theme(legend.position="none",
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        text=element_text(size=12, family="sans"))+
+  annotate(geom="text", x=2015, y=10, label="Northeast", color = "darkseagreen4") +
+  annotate(geom="text", x=2000, y=3, label="West", color = "orchid3") +
+  annotate(geom="text", x=1995, y=0.7, label="Other", color = "green4") +
+  annotate(geom="text", x=2005, y=4.5, label="Midwest", color = "darkorange1") +
+  annotate(geom="text", x=2010, y=6.9, label="South", color = "darkturquoise") +
+  scale_x_continuous(breaks = round(seq(min(clean_schools$year), max(clean_schools$year), by = 2),1)) +
+  labs(title = "Average Instruction Expenditure over time for the different regions", y = "Average Instruction Expenditure (in millions $)", x = "Year")
+```
 
-```{r}
+```{r, include = FALSE}
 clean_schools %>%
   #filter(!is.na(INSTRUCTION_EXPENDITURE)) %>%
   group_by(year, region, race, sex) %>%
@@ -211,8 +243,36 @@ clean_schools %>%
         panel.grid.minor = element_blank(),
         text=element_text(size=12, 
                           family="serif"),
-                          axis.text.y = element_text(size = 16))+
+        axis.text.y = element_text(size = 16))+
   labs(title = "Average Instruction Expenditure over time for the different regions", y = "Average Instruction Expenditure (in millions $)", x = "Year")
+```
+
+
+#### The Rise in Instrucion Expenditure
+In the United States, the average instruction expenditure rises overtime regardless of region. The **Northeast** is substainially higher from the other regions due to states like New York which has the highest instruction expenditure of any other states. This result is expected since the U.S popluation has increased by about 22% since the 1990's. 
+
+
+```{r, animated visuals, include= TRUE, results = TRUE}
+clean_schools %>%
+  group_by(year, region) %>%
+  mutate(
+    INSTRUCTION_EXPENDITURE = INSTRUCTION_EXPENDITURE,
+    avg = mean(INSTRUCTION_EXPENDITURE, na.rm = TRUE),
+         year = as.integer(year)) %>%
+  ggplot(mapping = aes(x = year, y = avg,
+                       color = region))+
+  geom_line() +
+  scale_x_continuous(breaks = seq(1992, 2016, 1), 
+                     limits=c(1992, 2016), guide = guide_axis(n.dodge=2)) +
+  theme(text=element_text(size=12, 
+                          family="serif"),
+                          axis.text.y = element_text(size = 16))+
+  labs(title = "Average Instruction Expenditure Over Time by Region",
+       x = "Year",
+       y = "Average Instruction Expenditure (Millions $)",
+       color = "Region") +
+  geom_point(aes(group = seq_along(as.numeric(year)))) +
+  transition_reveal(as.numeric(year))
 ```
 
 
@@ -237,20 +297,20 @@ summary(reading_model)
 ```
 
 
-```{r}
+```{r, results = "hide"}
 clean_schools %>%
   lm(score ~ test, data = .) ->
   test_model
 summary(test_model)
 ```
 
-```{r}
+```{r, results = "hide"}
 clean_schools %>%
   mutate(year = as.numeric(year)) %>%
   lm(score ~ test + year, data = .) %>%
   summary()
 ```
-```{r}
+```{r, results = "hide"}
 clean_schools %>%
   mutate(year = as.numeric(year),
          state = as.factor(state)) %>%
@@ -258,63 +318,73 @@ clean_schools %>%
   summary()
 ```
 
-```{r}
+```{r, results = "hide"}
 clean_schools %>%
   mutate(year = as.numeric(year)) %>%
   lm(score ~ test + year + region + SUPPORT_SERVICES_EXPENDITURE, data = .) %>%
   summary()
 ```
 
-```{r}
+```{r, results = "hide"}
 clean_schools %>%
   mutate(year = as.numeric(year)) %>%
   lm(score ~ test + year + region + SUPPORT_SERVICES_EXPENDITURE + race, data = .) %>%
   summary()
 ```
 
-```{r}
+```{r, results = "hide"}
 clean_schools %>%
   mutate(year = as.numeric(year)) %>%
   lm(score ~ test + year + region + race, data = .) %>%
   summary()
 ```
 
-```{r}
+```{r, results = "hide"}
 clean_schools %>%
   mutate(year = as.numeric(year)) %>%
   lm(score ~ test + year + region + SUPPORT_SERVICES_EXPENDITURE + race + grade, data = .) %>%
   summary()
 ```
 
-```{r}
+```{r, results = "hide"}
 clean_schools %>%
   mutate(year = as.numeric(year)) %>%
-  lm(score ~ test + year + region +  race + grade + INSTRUCTION_EXPENDITURE, data = .) %>%
+  lm(score ~ test + year + region +  race + grade + sex, data = .) %>%
+  summary()
+
+
+```
+
+```{r final model, results = "hide"}
+clean_schools %>%
+  mutate(year = as.numeric(year)) %>%
+  lm(score ~ test + year + region + race + grade + INSTRUCTION_EXPENDITURE, data = .) %>%
   summary()
 ```
 
-
-```{r final model}
-clean_schools %>%
-  mutate(year = as.numeric(year)) %>%
-  lm(score ~ test + year + region + race + grade , data = .) %>%
-  summary()
-```
 
 ## Linear Regression 
 
 #### Model Selection
 For our model selection process our main criteria was Adjusted R^2^. Since adding any variables, regardless of whether it explains any variation in the data, inflates the R^2^. Adjusted R^2^ takes this into account and penalizes unnecessary additional variables. We started with a simple linear regression model starting with the test scores as the response variable and the type of test as the explanatory variable. After this baseline model, we added additional variables one-by-one and checked the Adjusted R^2^ to see if the new variable is useful in the model. We looked for the Adjusted R^2^ to increase at least 3% in order to include it in the model. We did this in order to get the simplest model with the most influential variables.
 
+All independent variables were considered. We decided on our model by investigating the p-values corresponding to each of the independent variables as well. P-values should be less than our set value of alpha in order to pass the hypothesis that the coefficient corresponding to the independent variable is not zero.
+
+The result indicates that the p-values corresponding to TOTAL_EXPENDITURE, INSTRUCTION_EXPENDITURE, SUPPORT_SERVICES_EXPENDITURE and CAPITAL_OUTLAY_EXPENDITURE are greater than alpha, which we set as alpha = 0.05. As a result, we fail to reject the null hypothesis(the coefficient is equal to zero). As a result, we excluded these independent variables from our model.
+
 #### Final Model
+
 After going through the model selection process, we finalized our multiple linear regression model with the following variables: 
 
 * type of test
 * year
 * region
+* race
 * grade
 
-These variables were the most influential according to our model. The visualization below includes all the variables in our final model. It appears that grade followed by the type of test and race are the most influential. 
+
+
+**The visualization below includes all the variables in our final model.** It appears that grade followed by the type of test and race are the most influential. 
 
 
 
@@ -323,38 +393,99 @@ clean_schools %>%
   mutate(year = as.numeric(year)) %>%
   ggplot(mapping = aes(x = year, 
                            y = score,
-                           color = race))+
+                           color = race)) +
   geom_point()+
   geom_jitter()+
-  #stat_smooth(method = "lm")+
-  facet_grid(rows = vars(test), cols = vars(grade))+
+  #stat_smooth(method = "lm") +
+  facet_grid(rows = vars(test),
+             cols = vars(grade)) +
   theme(panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank())
+        panel.grid.minor = element_blank(),
+        text=element_text(size=12, 
+                          family="serif")
+        ) +
+  labs(title = "Final Model Explaining Test Scores",
+       color = "Race",
+       x = "Year",
+       y = "Test Score")
 ```
 
 
-Since there is only data on the different races after 2010, the graph below looks a little closer into the relationship between different races. There does seem to be a difference between
+Since there is only data on the different races after 2010, the graph below looks a little closer into the relationship between different races.
 
-```{r}
+```{r Making everysecond Function, include = FALSE}
+everysecond <- function(x){
+  x <- sort(unique(x))
+  x[seq(2, length(x), 2)] <- ""
+  x
+}
+#source: https://community.rstudio.com/t/how-to-automatically-skip-some-x-labels/65702/4)
+```
+
+
+```{r, fig.width = 6}
 clean_schools %>%
   filter(year >= 2010,
          race != "all") %>%
   mutate(year = as.factor(year)) %>%
   ggplot(mapping = aes(x = year, 
                            y = score,
-                           color = race))+
-  geom_point()+
-  geom_jitter()+
+                           color = race)) +
+  geom_point() +
+  geom_jitter() +
   stat_smooth(method = "lm")+
-  facet_grid(rows = vars(test), cols = vars(grade))+
+  facet_grid(rows = vars(test),
+             cols = vars(grade)) +
+  scale_x_discrete(
+    labels = everysecond(clean_schools$year)
+    ) +
   theme(panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank())
+        panel.grid.minor = element_blank(),
+        text=element_text(size=12, 
+                          family="serif")) +
+  labs(title = "Testing Scores by Race",
+       color = "Race",
+       x = "Year",
+       y = "Test Score")
 ```
 
 
-## Making Simulations 
 
-To make the simulations, we created the noise() function to add errors to the predictions, removing missing values and iterating this 1000 times. From there, we added the observed schools data to the simulated data for easier visualization and extracted the R-squared values from each simulation to visualize them with the histogram below. 
+
+```{r, fig.width = 15}
+clean_schools %>%
+  filter(year >= 2010,
+         race != "all") %>%
+  mutate(year = as.factor(year)) %>%
+  ggplot(mapping = aes(x = year, 
+                           y = score,
+                           color = grade)) +
+  geom_point() +
+  geom_jitter() +
+  stat_smooth(method = "lm")+
+  facet_grid(rows = vars(test), cols = vars(race)) +
+  scale_x_discrete(
+    labels = everysecond(clean_schools$year)
+    ) +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        text=element_text(size=15, 
+                          family="serif"),
+                          axis.text.x = element_text(size = 8)) +
+  labs(title = "Testing Scores by Race after 2010",
+       color = "Grade",
+       x = "Year",
+       y = "Test Score")
+```
+
+
+In general, grade 8 has higher test scores than that of grade 4. In mathematics grade 8 has higher variability than grade 4. while in reading, grade 4 has higher variability than grade 8. It seems like time doesn't influence the grade values or variabilities after 2010. Mathematics grades increase with time until 2010, while reading scores appear to increase in variability at 2010.
+
+In general, asians, white and and people of two or more races score higher in both mathematics and reading than black, native american, hispanics and pacific islanders. Asians seem to stand out in their mathematics grades. Grade 4 native american students have the lowest reading test scores.
+
+## Predictive Check
+
+To make the simulations for the predictive check on our model, we created the noise() function to add errors to the predictions, removing missing values and iterating this 1000 times. From there, we added the observed schools data to the simulated data for easier visualization and extracted the R-squared values from each simulation to visualize them with the histogram below. 
 
 ```{r}
 schools_lm <- clean_schools %>%
@@ -435,13 +566,15 @@ head(sim_r_sq)
 ```{r}
 tibble(sims = sim_r_sq) %>% 
   ggplot(aes(x = sims)) + 
-  geom_histogram()
+  geom_histogram() +
+   theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        text=element_text(size=12, 
+                          family="serif")) +
+  labs(
+    title = "Distribution of Simulated R-Sqaured",
+       x = "R-Squared")
 ```
 
-<<<<<<< HEAD
-
-
-
-=======
 From the simulation performed above, it is clear that the model describes the relationships of the variables included with a high amount of accuracy. In other words, the model actually accounts for around 85% of the variability in the observed schools data, so that only a small proportion is not accounted for, making this model a relatively good fit. 
->>>>>>> cc6bbaf07b8a1a868c9d15194b19c3a6c6202de8
+
